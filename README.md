@@ -6,7 +6,7 @@
 [![Supabase Auth](https://img.shields.io/badge/Database-Supabase-emerald.svg)](https://supabase.com/)
 [![Google Gemini AI](https://img.shields.io/badge/AI-Google%20Gemini%202.5-purple.svg)](https://ai.google.dev/)
 
-> **The Pitch:** *"Your site runs 4.2 °C hotter than the municipal average and stays above safe limits for 6 straight hours. Adjust the shift to 05:30–11:00 to eliminate heat stroke risk and keep your entire 30-worker crew productive."*
+> *"Your site runs 4.2 °C hotter than the municipal average and stays above safe limits for 6 straight hours. Adjust the shift to 05:30–11:00 to eliminate heat stroke risk and keep your entire 30-worker crew productive."*
 
 ---
 
