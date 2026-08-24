@@ -1,16 +1,18 @@
 import { ActivityType, PredefinedSitePreset, RiskLevel } from './types';
 
 export const POPULAR_INDIAN_LOCATIONS = [
+  "Dharavi, Mumbai, Maharashtra",
+  "Bandra Kurla Complex (BKC), Mumbai, Maharashtra",
+  "Navi Mumbai Vashi, Maharashtra",
   "Noida Sector 62, Uttar Pradesh",
   "Gurgaon Cyber City, Haryana",
   "Jaipur Sitapura Industrial Area, Rajasthan",
   "Lucknow Gomti Nagar Extension, Uttar Pradesh",
   "Kanpur Panki Industrial Estate, Uttar Pradesh",
   "Ahmedabad GIDC Naroda, Gujarat",
-  "Varanasi Bypass Alignment, Uttar Pradesh",
-  "Chandigarh IT Park, Punjab",
+  "Chennai Sriperumbudur Industrial Corridor, Tamil Nadu",
+  "Bengaluru Peenya Industrial Area, Karnataka",
   "Delhi Dwarka Expressway Sector 110",
-  "Mumbai JNPT Port Terminal, Maharashtra",
 ];
 
 export const ACTIVITY_TYPES: ActivityType[] = [
@@ -24,12 +26,56 @@ export const ACTIVITY_TYPES: ActivityType[] = [
 
 export const PRESET_SITES: PredefinedSitePreset[] = [
   {
+    siteName: "Dharavi Redevelopment Sector 1",
+    location: "Dharavi, Mumbai, Maharashtra",
+    activityType: "Concrete Pouring",
+    startTime: "06:00",
+    endTime: "18:00",
+    thresholdTemp: 34,
+    headcount: 30,
+    acclimatized: true,
+    shadeAvailable: false,
+    waterAvailable: true,
+    description: "High density urban heat island with +4.2°C thermal delta over city average. Heavy concrete slab pour."
+  },
+  {
+    siteName: "BKC Commercial Tower 4",
+    location: "Bandra Kurla Complex (BKC), Mumbai, Maharashtra",
+    activityType: "Roofing & Structural Steel",
+    startTime: "07:00",
+    endTime: "17:00",
+    thresholdTemp: 34,
+    headcount: 45,
+    acclimatized: false,
+    shadeAvailable: false,
+    waterAvailable: true,
+    description: "Glass facade and structural steel reflection causing extreme midday wet-bulb radiative load."
+  },
+  {
     siteName: "Noida Sec-62 Metro Extension",
     location: "Noida Sector 62, Uttar Pradesh",
     activityType: "Concrete Pouring",
     startTime: "06:00",
     endTime: "18:00",
     thresholdTemp: 35,
+    headcount: 50,
+    acclimatized: true,
+    shadeAvailable: false,
+    waterAvailable: true,
+    description: "Suburban Delhi NCR infrastructure corridor with heavy concrete hydration and solar zenith flux."
+  },
+  {
+    siteName: "Navi Mumbai Vashi Logistics Terminal",
+    location: "Navi Mumbai Vashi, Maharashtra",
+    activityType: "Material Loading/Unloading",
+    startTime: "06:00",
+    endTime: "16:00",
+    thresholdTemp: 35,
+    headcount: 25,
+    acclimatized: true,
+    shadeAvailable: true,
+    waterAvailable: true,
+    description: "Coastal humidity combined with asphalt thermal emission in semi-enclosed freight loading bay."
   },
   {
     siteName: "Jaipur Highway Flyover Alignment",
@@ -38,22 +84,11 @@ export const PRESET_SITES: PredefinedSitePreset[] = [
     startTime: "06:00",
     endTime: "17:00",
     thresholdTemp: 36,
-  },
-  {
-    siteName: "Gurgaon Commercial Tower B",
-    location: "Gurgaon Cyber City, Haryana",
-    activityType: "Roofing & Structural Steel",
-    startTime: "07:00",
-    endTime: "16:00",
-    thresholdTemp: 34,
-  },
-  {
-    siteName: "Lucknow Logistics Warehouse",
-    location: "Lucknow Gomti Nagar Extension, Uttar Pradesh",
-    activityType: "Material Loading/Unloading",
-    startTime: "06:00",
-    endTime: "18:00",
-    thresholdTemp: 35,
+    headcount: 35,
+    acclimatized: true,
+    shadeAvailable: false,
+    waterAvailable: true,
+    description: "Extreme dry heat with +4.5°C bitumen heat emission during high-temperature asphalt compaction."
   },
 ];
 

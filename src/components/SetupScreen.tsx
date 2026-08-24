@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Clock, Flame, ArrowRight, AlertCircle, Check, Sparkles, Loader2 } from 'lucide-react';
+import {
+  MapPin,
+  Clock,
+  Flame,
+  ArrowRight,
+  AlertCircle,
+  Check,
+  Sparkles,
+  Loader2,
+  Users,
+  Sun,
+  Droplets,
+  ShieldCheck,
+  Umbrella
+} from 'lucide-react';
 import { ActivityType, SiteConfig } from '../types';
 import { ACTIVITY_TYPES, POPULAR_INDIAN_LOCATIONS, PRESET_SITES } from '../constants';
 
@@ -10,11 +24,15 @@ interface SetupScreenProps {
 
 export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) => {
   const [siteName, setSiteName] = useState('');
-  const [location, setLocation] = useState('Noida Sector 62, Uttar Pradesh');
-  const [activityType, setActivityType] = useState<ActivityType>('Concrete Pouring');
+  const [location, setLocation] = useState('Dharavi Leather & Garment Cluster, Mumbai');
+  const [activityType, setActivityType] = useState<ActivityType>('Heavy Construction & Excavation');
   const [startTime, setStartTime] = useState('06:00');
   const [endTime, setEndTime] = useState('18:00');
   const [thresholdTemp, setThresholdTemp] = useState<number>(35);
+  const [headcount, setHeadcount] = useState<number>(30);
+  const [acclimatized, setAcclimatized] = useState<boolean>(true);
+  const [shadeAvailable, setShadeAvailable] = useState<boolean>(false);
+  const [waterAvailable, setWaterAvailable] = useState<boolean>(true);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
   const [liveGeoResults, setLiveGeoResults] = useState<string[]>([]);
@@ -63,7 +81,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
     if (!location || location.trim().length < 3) {
       setValidationError(
         language === 'en'
-          ? "We couldn't verify that location. Please select or enter a valid landmark or district name (e.g., 'Noida Sector 62')."
+          ? "We couldn't verify that location. Please select or enter a valid landmark or district name (e.g., 'Dharavi, Mumbai')."
           : "स्थान सत्यापित नहीं हो सका। कृपया एक वैध स्थल या जिला चुनें।"
       );
       return;
@@ -85,6 +103,10 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
       startTime,
       endTime,
       thresholdTemp,
+      headcount,
+      acclimatized,
+      shadeAvailable,
+      waterAvailable,
     });
   };
 
@@ -95,6 +117,10 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
     setStartTime(preset.startTime);
     setEndTime(preset.endTime);
     setThresholdTemp(preset.thresholdTemp);
+    if (preset.headcount) setHeadcount(preset.headcount);
+    if (preset.acclimatized !== undefined) setAcclimatized(preset.acclimatized);
+    if (preset.shadeAvailable !== undefined) setShadeAvailable(preset.shadeAvailable);
+    if (preset.waterAvailable !== undefined) setWaterAvailable(preset.waterAvailable);
     setValidationError(null);
   };
 
@@ -102,16 +128,16 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
     <div id="setup-screen-container" className="max-w-xl mx-auto py-4 px-4 space-y-6">
       {/* Title & Microcopy */}
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 text-xs font-semibold border border-neutral-200">
-          <Sparkles className="w-3.5 h-3.5 text-neutral-600" />
-          {language === 'en' ? 'Live Meteorological & AI Risk Evaluator' : 'साइट मौसम और AI जोखिम मूल्यांकन'}
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-100/70 text-orange-950 text-xs font-semibold border border-orange-200">
+          <Sparkles className="w-3.5 h-3.5 text-orange-600" />
+          {language === 'en' ? 'FortyGuard Hyperlocal & ISO 7243 WBGT Engine' : 'FortyGuard माइक्रोक्लाइमेट और WBGT इंजन'}
         </div>
         <h2 id="setup-title" className="text-2xl font-bold text-neutral-900 tracking-tight">
-          {language === 'en' ? 'Setup Today’s Working Site' : 'आज की कार्य साइट सेटअप करें'}
+          {language === 'en' ? 'Setup Today’s Site Shift' : 'आज की कार्य साइट सेटअप करें'}
         </h2>
         <p className="text-sm text-neutral-600">
           {language === 'en'
-            ? 'Real-time ISO 7243 WBGT calculation, Open-Meteo telemetry & Gemini AI safety reasoning.'
+            ? 'Hyperlocal urban heat island delta analysis, crew metabolic offset, and automated Go / Adjust / No-Go decision.'
             : 'हीट-स्ट्रोक जोखिम पूर्वानुमान और ब्रेक समय के लिए साइट का विवरण दर्ज करें।'}
         </p>
       </div>
@@ -119,7 +145,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
       {/* Quick 1-Tap Presets */}
       <div className="space-y-2">
         <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-          {language === 'en' ? 'Quick Indian Site Templates' : 'त्वरित साइट टेम्पलेट'}
+          {language === 'en' ? 'Quick Indian Site Templates (Demo Anchors)' : 'त्वरित भारतीय साइट टेम्पलेट्स'}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {PRESET_SITES.map((preset, idx) => (
@@ -133,8 +159,8 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
               <div className="font-semibold text-neutral-900 truncate">{preset.siteName}</div>
               <div className="text-neutral-500 text-[11px] truncate">{preset.location}</div>
               <div className="mt-1 flex items-center justify-between text-[10px] text-neutral-600 pt-1 border-t border-neutral-100">
-                <span>{preset.activityType}</span>
-                <span className="font-semibold text-amber-700">{preset.thresholdTemp}°C Limit</span>
+                <span className="truncate">{preset.activityType.split(' ')[0]}</span>
+                <span className="font-semibold text-orange-700 font-mono">Crew: {preset.headcount || 30}</span>
               </div>
             </button>
           ))}
@@ -167,7 +193,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
             type="text"
             value={siteName}
             onChange={(e) => setSiteName(e.target.value)}
-            placeholder={language === 'en' ? 'e.g., Delhi Metro Phase 4 Flyover B' : 'उदा., दिल्ली मेट्रो फ़्लाइओवर'}
+            placeholder={language === 'en' ? 'e.g., Dharavi Metro Station Pier Pour #4' : 'उदा., मेट्रो पियर निर्माण'}
             className="w-full px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50/50 text-neutral-900 text-sm focus:bg-white focus:border-neutral-900 focus:outline-none transition-all min-h-[44px]"
           />
         </div>
@@ -176,7 +202,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
         <div className="space-y-1.5 relative">
           <div className="flex items-center justify-between">
             <label htmlFor="input-location" className="block text-xs font-semibold text-neutral-700">
-              {language === 'en' ? 'Site Location (India & Global)' : 'साइट स्थान (भारत)'} <span className="text-red-500">*</span>
+              {language === 'en' ? 'Site Location (Hyperlocal 500m Box)' : 'साइट स्थान (500m क्षेत्र)'} <span className="text-red-500">*</span>
             </label>
             {isSearchingGeo && (
               <span className="text-[10px] text-neutral-400 flex items-center gap-1 font-mono">
@@ -225,7 +251,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
           )}
         </div>
 
-        {/* Activity Type Selectable Chips/Cards */}
+        {/* Activity Type Selectable Chips */}
         <div className="space-y-2">
           <label className="block text-xs font-semibold text-neutral-700">
             {language === 'en' ? 'Select Outdoor Activity Type' : 'आउटडोर कार्य प्रकार चुनें'} <span className="text-red-500">*</span>
@@ -246,7 +272,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
                   }`}
                 >
                   <div className="flex items-center justify-between w-full">
-                    <span className="font-semibold">{act}</span>
+                    <span className="font-semibold text-xs">{act}</span>
                     {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
                   </div>
                 </button>
@@ -255,8 +281,25 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
           </div>
         </div>
 
-        {/* Planned Working Hours */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Crew Size & Shift Window */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Headcount Input */}
+          <div className="space-y-1.5">
+            <label htmlFor="input-headcount" className="block text-xs font-semibold text-neutral-700 flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-neutral-500" />
+              <span>{language === 'en' ? 'Crew Headcount' : 'श्रमिक संख्या'}</span>
+            </label>
+            <input
+              id="input-headcount"
+              type="number"
+              min={1}
+              max={500}
+              value={headcount}
+              onChange={(e) => setHeadcount(Math.max(1, Number(e.target.value)))}
+              className="w-full px-3 py-2.5 rounded-xl border border-neutral-200 bg-neutral-50/50 text-neutral-900 text-xs font-bold font-mono focus:bg-white focus:border-neutral-900 focus:outline-none min-h-[44px]"
+            />
+          </div>
+
           <div className="space-y-1.5">
             <label htmlFor="input-start-time" className="block text-xs font-semibold text-neutral-700">
               {language === 'en' ? 'Shift Start Time' : 'शिफ्ट शुरू का समय'}
@@ -294,6 +337,81 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
           </div>
         </div>
 
+        {/* Physiological & Safety Toggles: Acclimatization, Shade, Water */}
+        <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200 space-y-3">
+          <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider block">
+            {language === 'en' ? 'Site Infrastructure & Physiology' : 'साइट बुनियादी ढांचा और कार्यबल'}
+          </span>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {/* Acclimatization Toggle */}
+            <button
+              type="button"
+              onClick={() => setAcclimatized(!acclimatized)}
+              className={`p-2.5 rounded-lg border text-left text-xs transition-all cursor-pointer ${
+                acclimatized
+                  ? 'bg-white border-emerald-300 text-neutral-900'
+                  : 'bg-amber-50/80 border-amber-200 text-amber-900'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  {acclimatized ? 'Acclimatized' : 'Unacclimatized'}
+                </span>
+                <span className="text-[10px] font-mono">{acclimatized ? '0°C' : '-1.5°C'}</span>
+              </div>
+              <span className="text-[10px] text-neutral-500 block mt-0.5">
+                {acclimatized ? '>14 days local exposure' : 'New/migrant crew'}
+              </span>
+            </button>
+
+            {/* Shade Availability Toggle */}
+            <button
+              type="button"
+              onClick={() => setShadeAvailable(!shadeAvailable)}
+              className={`p-2.5 rounded-lg border text-left text-xs transition-all cursor-pointer ${
+                shadeAvailable
+                  ? 'bg-white border-emerald-300 text-neutral-900'
+                  : 'bg-orange-50/80 border-orange-200 text-orange-950'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold flex items-center gap-1">
+                  <Umbrella className="w-3.5 h-3.5 text-blue-600" />
+                  {shadeAvailable ? 'UV Shade' : 'Direct Sun'}
+                </span>
+                <span className="text-[10px] font-mono">{shadeAvailable ? '0°C' : '+2.0°C'}</span>
+              </div>
+              <span className="text-[10px] text-neutral-500 block mt-0.5">
+                {shadeAvailable ? 'Shaded rest shelter' : 'Unshaded exposure'}
+              </span>
+            </button>
+
+            {/* Water Availability Toggle */}
+            <button
+              type="button"
+              onClick={() => setWaterAvailable(!waterAvailable)}
+              className={`p-2.5 rounded-lg border text-left text-xs transition-all cursor-pointer ${
+                waterAvailable
+                  ? 'bg-white border-emerald-300 text-neutral-900'
+                  : 'bg-red-50/80 border-red-200 text-red-950'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-bold flex items-center gap-1">
+                  <Droplets className="w-3.5 h-3.5 text-blue-600" />
+                  {waterAvailable ? 'Chilled Water' : 'Limited Water'}
+                </span>
+                <span className="text-[10px] font-mono">{waterAvailable ? '0°C' : '-1.0°C'}</span>
+              </div>
+              <span className="text-[10px] text-neutral-500 block mt-0.5">
+                {waterAvailable ? '<18°C potable water' : 'Restricted hydration'}
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* Threshold Temperature Numeric Input with quick controls */}
         <div className="space-y-1.5 p-3.5 rounded-xl bg-neutral-50 border border-neutral-200">
           <div className="flex items-center justify-between">
@@ -302,15 +420,9 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
               <span>{language === 'en' ? 'Safety Temperature Limit' : 'सुरक्षा तापमान सीमा'}</span>
             </label>
             <span className="text-xs font-mono font-bold text-amber-900 bg-amber-100 px-2 py-0.5 rounded border border-amber-200">
-              {thresholdTemp}°C Heat Index
+              {thresholdTemp}°C WBGT / Heat Index
             </span>
           </div>
-
-          <p className="text-[11px] text-neutral-500">
-            {language === 'en'
-              ? 'Default 35°C limit triggering mandatory labor pause per Indian WBGT standards.'
-              : 'भारतीय मानकों के अनुसार सुरक्षा ब्रेक ट्रिगर सीमा।'}
-          </p>
 
           <div className="flex items-center gap-3 pt-1">
             <button
@@ -345,7 +457,7 @@ export const SetupScreen: React.FC<SetupScreenProps> = ({ onSubmit, language }) 
           type="submit"
           className="w-full py-3.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.99] min-h-[48px] cursor-pointer"
         >
-          <span>{language === 'en' ? 'Analyze Today’s Site Risk' : 'आज के जोखिम का विश्लेषण करें'}</span>
+          <span>{language === 'en' ? 'Run 6-Stage FortyGuard HeatOps Pipeline' : '6-चरणीय FortyGuard हीट विश्लेषण चलाएं'}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </form>

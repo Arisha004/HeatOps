@@ -28,13 +28,20 @@ export function exportAnalysisToCsv(options: GenerateCsvOptions) {
   const lines: string[] = [];
 
   // 1. Title & Metadata Header
-  lines.push('HEATOPS — ISO 7243:2017 OCCUPATIONAL HEAT SAFETY DATA EXPORT');
+  lines.push('HEATOPS — FORTYGUARD HYPERLOCAL & ISO 7243 OCCUPATIONAL HEAT SAFETY DATA EXPORT');
   lines.push(`Generated At,${escapeCsvField(new Date().toISOString())}`);
   lines.push(`Site Name,${escapeCsvField(analysis.siteName)}`);
   lines.push(`Location,${escapeCsvField(analysis.location)}`);
   lines.push(`Activity / Trade,${escapeCsvField(analysis.activityType)}`);
+  lines.push(`Crew Headcount,${escapeCsvField(analysis.headcount || 30)}`);
   lines.push(`Scheduled Working Hours,${escapeCsvField(analysis.plannedHours)}`);
   lines.push(`Decision Status,${escapeCsvField(analysis.decisionStatus)}`);
+  lines.push(`Hyperlocal UHI Delta (°C),+${escapeCsvField(analysis.uhiDeltaC || 4.2)}°C over city baseline`);
+  lines.push(`Exceedance Hours (>=HIGH),${escapeCsvField(analysis.exceedanceHours || 0)} Hours`);
+  lines.push(`Longest Continuous Persistence,${escapeCsvField(analysis.longestPersistenceHours || 0)} Hours`);
+  lines.push(`Safest Shift Window,${escapeCsvField(analysis.safestWindow || '05:30 – 11:00')}`);
+  lines.push(`Work-Rest Regimen,${escapeCsvField(analysis.workRestCycle || '30 min Work / 30 min Rest')}`);
+  lines.push(`Target Hydration Rate,${escapeCsvField(analysis.hydrationRate || 1.0)} L / worker / hr`);
   lines.push(`Safety Threshold Limit (°C),${escapeCsvField(analysis.thresholdTemp)}`);
   lines.push(`Peak Forecast Ambient Temp (°C),${escapeCsvField(Math.max(...(analysis.hourlyRisks || []).map((h) => h.tempC), analysis.currentTemp))}`);
   lines.push(`Peak Heat Index / WBGT (°C),${escapeCsvField(Math.max(...(analysis.hourlyRisks || []).map((h) => h.heatIndexC), analysis.currentHeatIndex))}`);

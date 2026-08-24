@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wifi, WifiOff, Globe, Menu, Plus, Bell, User, LogIn, ShieldCheck, Trophy, Sparkles } from 'lucide-react';
+import { Wifi, WifiOff, Globe, Menu, Plus, Bell, User, LogIn, ShieldCheck, Trophy, Sparkles, Terminal } from 'lucide-react';
 import { Logo } from './Logo';
 import { AuthProfile } from '../lib/supabase';
 
@@ -17,6 +17,7 @@ interface HeaderProps {
   user?: AuthProfile | null;
   onOpenAuth?: () => void;
   onOpenJudgeTour?: () => void;
+  onOpenDocs?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   user,
   onOpenAuth,
   onOpenJudgeTour,
+  onOpenDocs,
 }) => {
   return (
     <header id="heatops-header" className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-neutral-200 px-4 py-2.5 min-h-[60px] flex items-center justify-between shadow-2xs">
@@ -76,6 +78,19 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* FortyGuard API & Architecture Docs Button */}
+        {onOpenDocs && (
+          <button
+            id="btn-fortyguard-docs"
+            onClick={onOpenDocs}
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200 shadow-2xs transition-all min-h-[38px] cursor-pointer"
+            title="FortyGuard API Endpoints, 6-Stage Pipeline & Project Impact"
+          >
+            <Terminal className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+            <span className="hidden lg:inline">API & Specs</span>
+          </button>
+        )}
+
         {/* Demo Scenarios & Quick-Start Button */}
         {onOpenJudgeTour && (
           <button

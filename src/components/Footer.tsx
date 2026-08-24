@@ -17,6 +17,7 @@ interface FooterProps {
   onOpenAuth: () => void;
   user: AuthProfile | null;
   onNavigate?: (tab: 'dashboard' | 'landing') => void;
+  onOpenDocs?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -24,6 +25,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenAuth,
   user,
   onNavigate,
+  onOpenDocs,
 }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -143,6 +145,16 @@ export const Footer: React.FC<FooterProps> = ({
                   {language === 'en' ? '3D Solar & Thermal Simulator' : '3D सोलर एवं ताप सिम्युलेटर'}
                 </button>
               </li>
+              {onOpenDocs && (
+                <li>
+                  <button
+                    onClick={onOpenDocs}
+                    className="text-orange-400 hover:text-orange-300 font-semibold transition-colors text-left cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{language === 'en' ? 'FortyGuard API & Architecture' : 'FortyGuard API दस्तावेज़'}</span>
+                  </button>
+                </li>
+              )}
               <li>
                 <button
                   onClick={onOpenAuth}

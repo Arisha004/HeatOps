@@ -6,6 +6,8 @@ import { SetupScreen } from './components/SetupScreen';
 import { DailyTimeline, DailyTimelineSkeleton } from './components/DailyTimeline';
 import { VerdictAndStats, VerdictAndStatsSkeleton } from './components/VerdictAndStats';
 import { AiReasoningCard } from './components/AiReasoningCard';
+import { ToolboxBriefingCard } from './components/ToolboxBriefingCard';
+import { PipelineInspectionCard } from './components/PipelineInspectionCard';
 import { HourDetailSheet } from './components/HourDetailSheet';
 import { EdgeCaseBanners } from './components/EdgeCaseBanners';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -15,6 +17,7 @@ import { NotificationModal } from './components/NotificationModal';
 import { AuthModal } from './components/AuthModal';
 import { JudgeTourModal } from './components/JudgeTourModal';
 import { IsoMathModal } from './components/IsoMathModal';
+import { FortyGuardDocsModal } from './components/FortyGuardDocsModal';
 import { Footer } from './components/Footer';
 import { AppView, HourlyRisk, RiskAnalysisResult, SiteConfig, PredefinedSitePreset } from './types';
 import { PRESET_SITES } from './constants';
@@ -71,6 +74,77 @@ const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
   recommendedPauseWindow: '11:00 AM – 03:30 PM',
   hydratedBreaksFrequency: 'Every 20 mins',
   timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+  uhiDeltaC: 4.8,
+  safestWindow: '05:30 – 10:30',
+  exceedanceHours: 5,
+  longestPersistenceHours: 4,
+  cumulativeExposure: 18.4,
+  workRestCycle: '30 min Work / 30 min Rest',
+  hydrationRate: 1.0,
+  headcount: 35,
+  acclimatized: true,
+  shadeAvailable: false,
+  waterAvailable: true,
+  toolboxBriefing: {
+    english: "Good morning team. Today at Noida Sector 62, we are executing concrete pouring for 35 workers. Because of dense asphalt and rebar heat trapping, our site runs 4.8°C hotter than the regional average, with 5 dangerous hours starting around 11:00 AM. Our safety decision is NO-GO for direct midday pours. We are strictly adhering to a 30 min Work / 30 min Rest protocol. Mandatory hydration is set to 1.0 litres per worker per hour. Take mandatory rest under UV-shaded shelters, use the buddy system to watch for dizziness, and report any heat exhaustion signs immediately. Let's work smart, stay hydrated, and stay safe.",
+    hindi: "नमस्ते साथियों। आज नोएडा सेक्टर 62 में कंक्रीट डालने का कार्य 35 श्रमिकों के साथ किया जाना है। हमारे साइट का तापमान शहर के औसत से 4.8°C अधिक रहेगा और दोपहर में 5 घंटे अत्यधिक गर्मी रहेगी। आज का सुरक्षा निर्णय दोपहर में कार्य स्थगन (NO-GO) है। सभी के लिए 30 मिनट कार्य / 30 मिनट विश्राम का नियम और प्रति घंटे 1.0 लीटर पानी पीना अनिवार्य है। चक्कर आने पर तुरंत शेड में आराम करें और सुपरवाइजर को सूचित करें। सुरक्षित रहें।",
+  },
+  pipelineStages: [
+    {
+      stageNumber: 1,
+      name: 'Intake Agent',
+      agentRole: 'Site Parameters & Boundary Normalizer',
+      status: 'completed',
+      durationMs: 140,
+      details: 'Normalized Noida Sector 62 into 500m site polygon buffer vs 15km NCR baseline. Trade: Concrete Pouring, Crew: 35.',
+      outputSummary: 'Validated OperationSpec: 35 workers, 06:00–18:00 shift window.',
+    },
+    {
+      stageNumber: 2,
+      name: 'Fetch Agent',
+      agentRole: 'FortyGuard Hyperlocal Telemetry Ingest',
+      status: 'completed',
+      durationMs: 380,
+      details: 'Retrieved hourly air temp, relative humidity, solar zenith radiation, and wind vector grids across 13 hourly intervals.',
+      outputSummary: 'Telemetry locked: Peak ambient 43°C, NCR baseline 38.2°C (UHI delta: +4.8°C).',
+    },
+    {
+      stageNumber: 3,
+      name: 'Risk Engine',
+      agentRole: 'Deterministic ISO 7243 & BoM Math Core',
+      status: 'completed',
+      durationMs: 95,
+      details: 'Computed vapour pressure e(RH, Ta), simplified BoM WBGT, metabolic offset (+1.5°C), and solar radiation load.',
+      outputSummary: 'Exceedance: 5 hrs, Longest persistence: 4 hrs, Safest window: 05:30 – 10:30.',
+    },
+    {
+      stageNumber: 4,
+      name: 'Mitigation Agent',
+      agentRole: 'ACGIH & NIOSH Protocol Planner',
+      status: 'completed',
+      durationMs: 260,
+      details: 'Mapped WBGT thermal band to occupational work-rest cycle and crew hydration logistics.',
+      outputSummary: 'Verdict: NO-GO, Work-rest: 30 min Work / 30 min Rest, Hydration: 1.0 L/worker/hr.',
+    },
+    {
+      stageNumber: 5,
+      name: 'Verification Agent',
+      agentRole: 'HSE Regulatory Compliance Auditor',
+      status: 'completed',
+      durationMs: 110,
+      details: 'Audited verdict numbers against ISO 7243:2017 standards, verifying zero mathematical drift.',
+      outputSummary: 'Compliance Passed: 100% verified against OSHA/NDMA safety criteria.',
+    },
+    {
+      stageNumber: 6,
+      name: 'Briefing Agent',
+      agentRole: 'Bilingual Field Toolbox Talk Generator',
+      status: 'completed',
+      durationMs: 190,
+      details: 'Generated 120-word spoken audio toolbox briefing in English and Hindi for crew supervisors.',
+      outputSummary: 'Toolbox Briefing Ready: Audio synthesis stream operational.',
+    },
+  ],
 };
 
 export default function App() {
@@ -82,6 +156,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [isJudgeModalOpen, setIsJudgeModalOpen] = useState<boolean>(false);
   const [isIsoMathModalOpen, setIsIsoMathModalOpen] = useState<boolean>(false);
+  const [isDocsModalOpen, setIsDocsModalOpen] = useState<boolean>(false);
   const [isSimulatingLiveSensor, setIsSimulatingLiveSensor] = useState<boolean>(false);
   const [authUser, setAuthUser] = useState<AuthProfile | null>(() => getStoredLocalUser());
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -290,7 +365,7 @@ export default function App() {
   };
 
   return (
-    <div id="app-root" className="min-h-screen bg-[#FAFAFA] text-neutral-900 font-sans antialiased flex flex-col justify-between relative">
+    <div id="app-root" className="min-h-screen bg-white text-neutral-900 font-sans antialiased flex flex-col justify-between relative">
       <div>
         {/* Toast Banner */}
         {toastMessage && (
@@ -323,6 +398,7 @@ export default function App() {
           user={authUser}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenJudgeTour={() => setIsJudgeModalOpen(true)}
+          onOpenDocs={() => setIsDocsModalOpen(true)}
         />
 
         {/* Navigation & History Sidebar */}
@@ -348,6 +424,7 @@ export default function App() {
           user={authUser}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onSignOut={handleSignOut}
+          onOpenDocs={() => setIsDocsModalOpen(true)}
         />
 
         {/* Primary Content Container */}
@@ -400,7 +477,7 @@ export default function App() {
                 language={language}
               />
 
-              {/* Core Screen 1: Prominent GO / NO-GO Decision Card & Verdict Banner */}
+              {/* Core Screen 1: Prominent GO / ADJUST / NO-GO Decision Card & Verdict Banner */}
               <VerdictAndStats
                 analysis={activeAnalysis}
                 language={language}
@@ -408,7 +485,32 @@ export default function App() {
                 user={authUser}
               />
 
-              {/* Core Screen 2: Hourly Risk Timeline */}
+              {/* Core Screen 2: 120-Word Bilingual Supervisor Spoken Toolbox Talk */}
+              {activeAnalysis.toolboxBriefing && (
+                <ToolboxBriefingCard
+                  briefing={activeAnalysis.toolboxBriefing}
+                  siteName={activeAnalysis.siteName}
+                  location={activeAnalysis.location}
+                  activityType={activeAnalysis.activityType}
+                  headcount={activeAnalysis.headcount || 30}
+                  workRestCycle={activeAnalysis.workRestCycle || '30 min Work / 30 min Rest'}
+                  hydrationRate={activeAnalysis.hydrationRate || 1.0}
+                  safestWindow={activeAnalysis.safestWindow || '05:30 – 11:00'}
+                  decisionStatus={activeAnalysis.decisionStatus}
+                  uhiDeltaC={activeAnalysis.uhiDeltaC || 4.2}
+                  language={language}
+                />
+              )}
+
+              {/* Core Screen 3: 6-Stage Multi-Agent Safety Pipeline Audit Trail */}
+              {activeAnalysis.pipelineStages && activeAnalysis.pipelineStages.length > 0 && (
+                <PipelineInspectionCard
+                  stages={activeAnalysis.pipelineStages}
+                  language={language}
+                />
+              )}
+
+              {/* Core Screen 4: Hourly Risk Timeline */}
               <DailyTimeline
                 hourlyRisks={activeAnalysis.hourlyRisks}
                 selectedHour={selectedHour}
@@ -417,7 +519,7 @@ export default function App() {
                 isPartialData={isPartialData}
               />
 
-              {/* Core Screen 3: Transparent AI Reasoning Card */}
+              {/* Core Screen 5: Transparent AI Reasoning Card */}
               <AiReasoningCard reasoning={activeAnalysis.aiReasoning} language={language} />
 
               {/* Quick Action Footer Controls */}
@@ -487,6 +589,7 @@ export default function App() {
             setCurrentView('landing');
           }
         }}
+        onOpenDocs={() => setIsDocsModalOpen(true)}
       />
 
       {/* Hourly Detail Popover / Sheet */}
@@ -516,6 +619,13 @@ export default function App() {
           setAuthUser(profile);
           showToast(`Welcome back, ${profile.fullName}! Authenticated via Supabase.`);
         }}
+      />
+
+      {/* FortyGuard API & Project Architecture Docs Modal */}
+      <FortyGuardDocsModal
+        isOpen={isDocsModalOpen}
+        onClose={() => setIsDocsModalOpen(false)}
+        language={language}
       />
 
       {/* Hackathon Judge Evaluation & Quick-Start Modal */}

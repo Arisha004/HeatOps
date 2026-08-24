@@ -19,17 +19,14 @@ export function HeroSection({
   ];
 
   return (
-    <section className="relative w-full overflow-hidden bg-white px-4 pb-16 pt-10 sm:px-6 sm:pt-14 md:pb-24 md:pt-16 lg:pb-32">
-      {/* Globe background layer — subtle, professional, 3D */}
-      <div className="pointer-events-none absolute inset-0 flex items-start justify-center overflow-hidden opacity-85 sm:opacity-90 md:opacity-100 z-0">
-        <Globe className="top-0 sm:-top-2 md:-top-6 scale-100 sm:scale-110 md:scale-120" />
+    <section className="relative w-full overflow-hidden bg-transparent px-4 pb-16 pt-6 sm:px-6 sm:pt-10 md:pb-24 md:pt-12 lg:pb-28">
+      {/* Globe background 3D layer */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden z-0 pointer-events-auto">
+        <Globe className="top-0 scale-95 sm:scale-105 md:scale-110" />
       </div>
 
-      {/* Soft radial fade so globe doesn't compete with text */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.15)_0%,rgba(255,255,255,0.55)_50%,rgba(255,255,255,0.98)_85%)] z-[1]" />
-
       {/* Content */}
-      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center">
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center pointer-events-none">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-black px-4 py-1.5 text-xs font-medium sm:text-sm">
           <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
           <span className="text-green-400">LIVE TELEMETRY:</span>
@@ -51,7 +48,7 @@ export function HeroSection({
           1-tap bilingual SMS alerts to site supervisors.
         </p>
 
-        <div className="mt-8 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row">
+        <div className="mt-8 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row pointer-events-auto">
           <button
             id="btn-hero-launch-evaluator"
             onClick={onLaunchTool}
@@ -70,7 +67,7 @@ export function HeroSection({
           </button>
         </div>
 
-        <div className="mt-8 flex w-full flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
+        <div className="mt-8 flex w-full flex-wrap items-center justify-center gap-2 text-xs sm:text-sm pointer-events-auto">
           <span className="mr-1 text-neutral-500">Quick Presets:</span>
           {presets.map((preset, index) => (
             <button

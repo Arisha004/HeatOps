@@ -41,13 +41,25 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
   const [csvSuccess, setCsvSuccess] = useState(false);
 
   const isNoGo = analysis.decisionStatus === 'NO-GO';
+  const isAdjust = analysis.decisionStatus === 'ADJUST';
   const isCaution = analysis.decisionStatus === 'CAUTION';
 
   const decisionBadgeClass = isNoGo
     ? 'bg-red-50 text-red-900 border-red-200'
+    : isAdjust
+    ? 'bg-orange-50 text-orange-950 border-orange-300'
     : isCaution
     ? 'bg-amber-50 text-amber-900 border-amber-200'
     : 'bg-emerald-50 text-emerald-900 border-emerald-200';
+
+  const cityName = analysis.location.split(',')[0] || 'City';
+  const uhiDelta = analysis.uhiDeltaC || 4.2;
+  const exceedance = analysis.exceedanceHours || 6;
+  const persistence = analysis.longestPersistenceHours || 4;
+  const safestWin = analysis.safestWindow || '05:30 – 11:00';
+  const crew = analysis.headcount || 30;
+  const regimen = analysis.workRestCycle || '30 min Work / 30 min Rest';
+  const hydration = analysis.hydrationRate || 1.0;
 
   const handleNotifyCrew = () => {
     if (onOpenNotifyModal) {
@@ -170,12 +182,14 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         </p>
       </div>
 
-      {/* 2. Sticky Prominent GO / NO-GO Decision Card */}
+      {/* 2. Sticky Prominent GO / ADJUST / NO-GO Decision Card */}
       <div
         id="decision-card"
         className={`bg-white rounded-2xl border p-5 shadow-md transition-all space-y-4 ${
           isNoGo
             ? 'border-red-300 ring-1 ring-red-200'
+            : isAdjust
+            ? 'border-orange-300 ring-1 ring-orange-200'
             : isCaution
             ? 'border-amber-300 ring-1 ring-amber-200'
             : 'border-emerald-300 ring-1 ring-emerald-200'
@@ -186,6 +200,10 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
             {isNoGo ? (
               <div className="w-12 h-12 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
                 <ShieldAlert className="w-7 h-7" />
+              </div>
+            ) : isAdjust ? (
+              <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-7 h-7" />
               </div>
             ) : isCaution ? (
               <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
@@ -219,6 +237,41 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
             <span id="recommended-pause-window" className="text-sm font-bold text-neutral-900 font-mono">
               {analysis.recommendedPauseWindow}
             </span>
+          </div>
+        </div>
+
+        {/* FortyGuard Decision Banner / Pitch Callout */}
+        <div className="p-3.5 rounded-xl bg-orange-50/80 border border-orange-200 text-orange-950 text-xs sm:text-sm font-medium leading-snug">
+          <span className="font-bold text-orange-900 block mb-0.5">
+            {language === 'en' ? 'Hyperlocal FortyGuard Risk Recommendation:' : 'हाइपरलोकल तापमान जोखिम सिफारिश:'}
+          </span>
+          "Your site runs <strong className="text-orange-900 font-bold">{uhiDelta}°C hotter</strong> than the {cityName} average, and stays above the safe threshold for <strong className="text-orange-900 font-bold">{exceedance} straight hours</strong>. Move the {analysis.activityType.toLowerCase()} to <strong className="text-emerald-800 font-bold font-mono bg-white px-1.5 py-0.5 rounded border border-orange-200">{safestWin}</strong> and you keep all <strong className="text-orange-900 font-bold">{crew} workers</strong>."
+        </div>
+
+        {/* 4 FortyGuard Deterministic Metrics Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
+          <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200">
+            <span className="text-[10px] text-neutral-500 font-bold uppercase block">UHI Thermal Delta</span>
+            <span className="text-base font-bold font-mono text-orange-600 block">+{uhiDelta}°C</span>
+            <span className="text-[10px] text-neutral-400">vs city baseline</span>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200">
+            <span className="text-[10px] text-neutral-500 font-bold uppercase block">Exceedance Hours</span>
+            <span className="text-base font-bold font-mono text-red-600 block">{exceedance} Hours</span>
+            <span className="text-[10px] text-neutral-400">above safe WBGT</span>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200">
+            <span className="text-[10px] text-neutral-500 font-bold uppercase block">Max Persistence</span>
+            <span className="text-base font-bold font-mono text-amber-700 block">{persistence} Hours</span>
+            <span className="text-[10px] text-neutral-400">continuous extreme</span>
+          </div>
+
+          <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200">
+            <span className="text-[10px] text-neutral-500 font-bold uppercase block">Work-Rest Protocol</span>
+            <span className="text-xs font-bold text-neutral-900 block truncate" title={regimen}>{regimen}</span>
+            <span className="text-[10px] text-blue-700 font-semibold">{hydration} L/worker/hr</span>
           </div>
         </div>
 

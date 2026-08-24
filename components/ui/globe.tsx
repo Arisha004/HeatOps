@@ -1,1 +1,1 @@
-export { Globe } from "../../src/components/ui/globe";
+export { Globe, GlobeDemo } from "../../src/components/ui/globe";

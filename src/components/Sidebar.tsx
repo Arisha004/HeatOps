@@ -26,6 +26,7 @@ interface SidebarProps {
   user?: AuthProfile | null;
   onOpenAuth?: () => void;
   onSignOut?: () => void;
+  onOpenDocs?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -47,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   user,
   onOpenAuth,
   onSignOut,
+  onOpenDocs,
 }) => {
   if (!isOpen) return null;
 
@@ -197,6 +199,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <ShieldCheck className="w-4 h-4 text-neutral-500" />
               <span>{language === 'en' ? 'Active Site Dashboard' : 'लाइव साइट डैशबोर्ड'}</span>
             </button>
+
+            {onOpenDocs && (
+              <button
+                id="nav-btn-docs"
+                onClick={() => {
+                  onOpenDocs();
+                  onClose();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-orange-50 hover:text-orange-900 transition-colors cursor-pointer"
+              >
+                <Code className="w-4 h-4 text-orange-600" />
+                <span>{language === 'en' ? 'FortyGuard API & Specs' : 'FortyGuard API दस्तावेज़'}</span>
+              </button>
+            )}
           </div>
 
           {/* Saved / Past Site Assessments */}
