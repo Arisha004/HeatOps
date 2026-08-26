@@ -43,6 +43,20 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
 
   let y = 14;
 
+  // Vertical space reserved at the bottom of every page for the footer note.
+  const footerReserve = 12;
+  // Lowest y a section may occupy before it must flow onto a new page.
+  const maxY = pageHeight - footerReserve;
+
+  // Starts a new page when `needed` mm will not fit above the footer.
+  // Returns true if a page break happened, so callers can re-draw table headers.
+  const ensureSpace = (needed: number): boolean => {
+    if (y + needed <= maxY) return false;
+    doc.addPage();
+    y = 14;
+    return true;
+  };
+
   // ==========================================
   // 1. HEADER SECTION (No text collisions)
   // ==========================================
@@ -137,7 +151,31 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
   // ==========================================
   // 3. EXECUTIVE SAFETY VERDICT BANNER
   // ==========================================
-  const verdictCardHeight = 28;
+  // Measure the wrapped text FIRST so the card can be sized to fit it.
+  // Previously the card was a fixed 28mm and only line [0] of each block was
+  // drawn, which silently cut the verdict and trigger off mid-sentence.
+  const verdictLineHeight = 4.6;   // for 10.5pt bold
+  const reasonLineHeight = 3.6;    // for 8pt normal
+  doc.setFontSize(10.5);
+  doc.setFont('helvetica', 'bold');
+  const verdictLines: string[] = doc.splitTextToSize(
+    analysis.overallVerdict || '',
+    contentWidth - 16
+  );
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  const reasonLines: string[] = doc.splitTextToSize(
+    `Trigger: ${analysis.goNoGoReason || ''}`,
+    contentWidth - 16
+  );
+
+  const verdictTop = 12;           // first verdict baseline, below the status badge
+  const verdictBlock = verdictLines.length * verdictLineHeight;
+  const reasonBlock = reasonLines.length * reasonLineHeight;
+  const pauseBlock = 7.5;          // pause/hydration callout + bottom padding
+  const verdictCardHeight = Math.max(28, verdictTop + verdictBlock + 2 + reasonBlock + pauseBlock);
+
+  ensureSpace(verdictCardHeight + 5);
   doc.setFillColor(statusBg[0], statusBg[1], statusBg[2]);
   doc.setDrawColor(statusColor[0], statusColor[1], statusColor[2]);
   doc.setLineWidth(0.5);
@@ -154,25 +192,31 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
   doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
   doc.text(`OCCUPATIONAL SAFETY VERDICT: ${analysis.decisionStatus} STATUS`, margin + 9, y + 6.5);
 
-  // Big Verdict Headline (Wrapped cleanly)
+  // Big Verdict Headline - every wrapped line is drawn, not just the first.
   doc.setFontSize(10.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colorDark[0], colorDark[1], colorDark[2]);
-  const verdictLines = doc.splitTextToSize(analysis.overallVerdict, contentWidth - 16);
-  doc.text(verdictLines[0] || analysis.overallVerdict, margin + 9, y + 13);
+  let vy = y + verdictTop;
+  verdictLines.forEach((line) => {
+    doc.text(line, margin + 9, vy);
+    vy += verdictLineHeight;
+  });
 
-  // Reason / Risk explanation
+  // Reason / Risk explanation - full wrapped text.
+  vy += 2;
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(colorDark[0], colorDark[1], colorDark[2]);
-  const reasonLines = doc.splitTextToSize(`Trigger: ${analysis.goNoGoReason}`, contentWidth - 16);
-  doc.text(reasonLines[0] || analysis.goNoGoReason, margin + 9, y + 19);
+  reasonLines.forEach((line) => {
+    doc.text(line, margin + 9, vy);
+    vy += reasonLineHeight;
+  });
 
-  // Pause & Hydration schedule callout
+  // Pause & Hydration schedule callout, pinned to the bottom of the card
   doc.setFontSize(7.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(colorOrange[0], colorOrange[1], colorOrange[2]);
-  doc.text(`Recommended Pause: ${analysis.recommendedPauseWindow}   |   Hydration: ${analysis.hydratedBreaksFrequency}`, margin + 9, y + 24.5);
+  doc.text(`Recommended Pause: ${analysis.recommendedPauseWindow}   |   Hydration: ${analysis.hydratedBreaksFrequency}`, margin + 9, y + verdictCardHeight - 3.5);
 
   y += verdictCardHeight + 5; // y is now 105
 
@@ -228,13 +272,6 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
 
   // Table Header
   const tableHeaderHeight = 6.5;
-  doc.setFillColor(colorNavy[0], colorNavy[1], colorNavy[2]);
-  doc.roundedRect(margin, y, contentWidth, tableHeaderHeight, 1, 1, 'F');
-
-  doc.setFontSize(6.5);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(255, 255, 255);
-
   const tColTime = margin + 4;
   const tColAir = margin + 22;
   const tColWbgt = margin + 44;
@@ -243,21 +280,35 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
   const tColUv = margin + 116;
   const tColAction = margin + 136;
 
-  doc.text('TIME', tColTime, y + 4.5);
-  doc.text('AIR TEMP', tColAir, y + 4.5);
-  doc.text('WBGT / INDEX', tColWbgt, y + 4.5);
-  doc.text('RISK LEVEL', tColRisk, y + 4.5);
-  doc.text('HUMIDITY', tColHum, y + 4.5);
-  doc.text('UV INDEX', tColUv, y + 4.5);
-  doc.text('SAFETY ACTION & WORK-REST DIRECTIVE', tColAction, y + 4.5);
+  // Drawn once here, and again at the top of each continuation page so a
+  // multi-page schedule stays readable.
+  const drawTableHeader = () => {
+    doc.setFillColor(colorNavy[0], colorNavy[1], colorNavy[2]);
+    doc.roundedRect(margin, y, contentWidth, tableHeaderHeight, 1, 1, 'F');
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    doc.text('TIME', tColTime, y + 4.5);
+    doc.text('AIR TEMP', tColAir, y + 4.5);
+    doc.text('WBGT / INDEX', tColWbgt, y + 4.5);
+    doc.text('RISK LEVEL', tColRisk, y + 4.5);
+    doc.text('HUMIDITY', tColHum, y + 4.5);
+    doc.text('UV INDEX', tColUv, y + 4.5);
+    doc.text('SAFETY ACTION & WORK-REST DIRECTIVE', tColAction, y + 4.5);
+    y += tableHeaderHeight;
+  };
 
-  y += tableHeaderHeight;
-
-  // Render Table Rows (up to 11 hours)
-  const rows = (analysis.hourlyRisks || []).slice(0, 10);
   const rowHeight = 5.8;
+  ensureSpace(tableHeaderHeight + rowHeight * 2);
+  drawTableHeader();
+
+  // Render EVERY hour returned by the engine. This was previously
+  // .slice(0, 10), which silently dropped the 4 PM / 5 PM / 6 PM rows from a
+  // standard 6 AM-6 PM (13 hour) shift - the hottest part of the afternoon.
+  const rows = analysis.hourlyRisks || [];
 
   rows.forEach((row, i) => {
+    if (ensureSpace(rowHeight)) drawTableHeader();
     const isEven = i % 2 === 0;
     doc.setFillColor(isEven ? 255 : 248, isEven ? 255 : 250, isEven ? 255 : 252);
     doc.rect(margin, y, contentWidth, rowHeight, 'F');
@@ -314,6 +365,7 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
   y += 4;
 
   const actionBoxHeight = 23;
+  ensureSpace(actionBoxHeight + 5);
   doc.setFillColor(colorBgLight[0], colorBgLight[1], colorBgLight[2]);
   doc.setDrawColor(colorBorder[0], colorBorder[1], colorBorder[2]);
   doc.roundedRect(margin, y, contentWidth, actionBoxHeight, 1.5, 1.5, 'FD');
@@ -338,6 +390,7 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
   // 7. VERIFICATION & SIGN-OFF AUDIT BLOCK
   // ==========================================
   const signoffHeight = 22;
+  ensureSpace(signoffHeight);
   doc.setDrawColor(colorBorder[0], colorBorder[1], colorBorder[2]);
   doc.roundedRect(margin, y, contentWidth, signoffHeight, 1.5, 1.5, 'D');
 
@@ -368,15 +421,23 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
   // ==========================================
   // 8. FOOTER NOTE (Bottom of Page)
   // ==========================================
-  doc.setFontSize(6.5);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(colorMuted[0], colorMuted[1], colorMuted[2]);
-  doc.text(
-    'HeatOps Enterprise Safety Engine • ISO 7243:2017 & OSHA 3154 Compliant • Validated against Live High-Resolution Meteorological Telemetry',
-    pageWidth / 2,
-    pageHeight - 7,
-    { align: 'center' }
-  );
+  // Drawn on EVERY page - the report can now span more than one page.
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFontSize(6.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(colorMuted[0], colorMuted[1], colorMuted[2]);
+    doc.text(
+      'HeatOps Enterprise Safety Engine • ISO 7243:2017 & OSHA 3154 Compliant • Validated against Live High-Resolution Meteorological Telemetry',
+      pageWidth / 2,
+      pageHeight - 7,
+      { align: 'center' }
+    );
+    if (totalPages > 1) {
+      doc.text(`Page ${p} of ${totalPages}`, pageWidth - margin, pageHeight - 7, { align: 'right' });
+    }
+  }
 
   // Trigger download
   const sanitizedSite = analysis.siteName.replace(/[^a-zA-Z0-9_-]/g, '_');

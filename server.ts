@@ -1,12 +1,137 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
 import { createServer as createViteServer } from 'vite';
+import {
+  siteBox,
+  fetchHeatmapStats,
+  fetchEnvParams,
+  submitHeatIntelligenceReport,
+  checkStatus,
+  celsiusToFahrenheit,
+  type FGDateTime,
+} from './lib/fortyguard';
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+const FORTYGUARD_API_KEY = process.env.FORTYGUARD_API_KEY || '';
+
+interface FortyGuardTelemetry {
+  source: 'fortyguard-live';
+  // null when /v1/heatmap returns no cells for the AOI. env_params readings
+  // below can still be valid in that case, so this is not an all-or-nothing
+  // signal - callers must fall back to Open-Meteo for temperature only.
+  siteTempC: number | null;
+  cityTempC: number | null;
+  uhiDeltaC: number | null;
+  humidity: number | null;
+  heatIndexC: number | null;
+  solarWm2: number | null;
+  aqi: number | null;
+}
+
+// Real hyperlocal UHI delta + environmental readings from the FortyGuard
+// Enterprise API.
+//   - /v1/heatmap is the only endpoint that aggregates over an area, so it's
+//     what actually produces the "500m site vs 15km city" temperature delta
+//     (via stats_data.Temperature_stats.Mean on two polygons).
+//   - /v1/env_params enriches the exact site point with heat index, humidity,
+//     AQI, and solar irradiance. It requires a temperature INPUT in Celsius
+//     (it doesn't measure temperature itself), so we feed it the current-hour
+//     Open-Meteo reading. It has no wind field — wind stays Open-Meteo-only.
+//   - /v1/heat_intelligence is deliberately NOT called here: it returns a
+//     slow (minutes-long) PDF report, not numbers. See the separate
+//     /api/generate-report and /api/report-status routes below.
+// Returns null (triggering the existing Open-Meteo/fixture fallback) if no
+// key is configured or any call fails/times out — this never throws.
+// FortyGuard's current release only accepts coordinates within the United
+// States (docs-api.fortyguard.com/docs/limitations, "Regional Coverage").
+// Requests outside that box return status "Completed" with n_cells: 0 rather
+// than a 400 — so we check locally first to avoid burning credits on calls
+// that are guaranteed to return no data.
+function isWithinFortyGuardCoverage(lat: number, lon: number): boolean {
+  // Conservative continental-US bounding box. Deliberately excludes
+  // Alaska/Hawaii/territories — narrower-than-necessary is the safe
+  // direction here (worst case we skip a few valid US calls, we never
+  // burn credits on a guaranteed-empty request).
+  return lat >= 24 && lat <= 50 && lon >= -125 && lon <= -66;
+}
+
+async function fetchFortyGuardTelemetry(lat: number, lon: number, liveHourlyWeather: any) {
+  if (!FORTYGUARD_API_KEY) return null;
+  if (!isWithinFortyGuardCoverage(lat, lon)) return null;
+
+  try {
+    const now = new Date();
+    const currentUtcHour = now.getUTCHours();
+    const dateTime: FGDateTime = {
+      start_date: now.toISOString().slice(0, 10),
+      start_time: `${String(currentUtcHour).padStart(2, '0')}:00`,
+      filter_type: 1,
+    };
+
+    const siteRing = siteBox(lat, lon, 500);
+    const cityRing = siteBox(lat, lon, 15000);
+
+    // Current-hour temperature to feed env_params (it's a required input,
+    // not something FortyGuard measures). Falls back to a seasonal default
+    // if Open-Meteo's current-hour reading isn't available.
+    const currentTempC =
+      liveHourlyWeather?.temperature_2m?.[currentUtcHour] !== undefined
+        ? liveHourlyWeather.temperature_2m[currentUtcHour]
+        : 32;
+
+    const [siteStats, cityStats, envParams] = await Promise.all([
+      fetchHeatmapStats(FORTYGUARD_API_KEY, siteRing, dateTime),
+      fetchHeatmapStats(FORTYGUARD_API_KEY, cityRing, dateTime),
+      fetchEnvParams(FORTYGUARD_API_KEY, lat, lon, currentTempC, dateTime, [
+        'heat_index_celsius',
+        'relative_humidity_percent',
+        'air_quality:idx',
+      ]).catch((err) => {
+        console.warn('FortyGuard env_params call failed (non-fatal):', err instanceof Error ? err.message : err);
+        return null;
+      }),
+    ]);
+
+    // /v1/heatmap regularly completes with n_cells: 0 (no surface cells for the
+    // AOI). Previously that discarded the whole telemetry object - including
+    // the env_params readings we had already paid credits for - and silently
+    // dropped the request to Open-Meteo. Keep whatever we actually got: the
+    // UHI delta degrades to null, the environmental readings survive.
+    if (siteStats.mean === null) {
+      console.warn(
+        `FortyGuard /v1/heatmap returned no Temperature_stats (n_cells: ${siteStats.nCells}). ` +
+        'UHI delta unavailable for this site; env_params readings are still used if present.'
+      );
+      if (!envParams || (envParams.heatIndexC === null && envParams.humidity === null)) {
+        return null; // nothing usable from either endpoint
+      }
+    }
+
+    const uhiDeltaC = siteStats.mean !== null && cityStats.mean !== null
+      ? Math.round((siteStats.mean - cityStats.mean) * 10) / 10
+      : null;
+
+    return {
+      source: 'fortyguard-live' as const,
+      siteTempC: siteStats.mean !== null ? Math.round(siteStats.mean * 10) / 10 : null,
+      cityTempC: cityStats.mean !== null ? Math.round(cityStats.mean * 10) / 10 : null,
+      uhiDeltaC,
+      humidity: envParams?.humidity ?? null,
+      heatIndexC: envParams?.heatIndexC ?? null,
+      solarWm2: envParams?.solarGhiWm2 ?? null,
+      aqi: envParams?.aqi ?? null,
+    };
+  } catch (err) {
+    console.warn('FortyGuard live telemetry unavailable, falling back to Open-Meteo/fixtures:', err instanceof Error ? err.message : err);
+    return null;
+  }
+}
 
 // Initialize GoogleGenAI server-side with required User-Agent telemetry
 let ai: GoogleGenAI | null = null;
@@ -94,7 +219,9 @@ function buildOccupationalHeatProfile(
   acclimatized: boolean = true,
   shadeAvailable: boolean = false,
   waterAvailable: boolean = true,
-  liveHourlyWeather: any = null
+  liveHourlyWeather: any = null,
+  fortyGuardTelemetry: FortyGuardTelemetry | null = null,
+  fortyGuardSkipReason: 'no-key' | 'outside-us-coverage' | null = null
 ) {
   // Activity severity factor (Metabolic workload strain in °C offset)
   let activityStrainC = 1.0;
@@ -121,15 +248,26 @@ function buildOccupationalHeatProfile(
 
   const effectiveThreshold = thresholdTemp + thresholdOffset;
 
-  // Hyperlocal Urban Heat Island (UHI) Delta calibration based on microclimate density
+  // Hyperlocal Urban Heat Island (UHI) Delta.
+  // Preferred: real FortyGuard heat-intelligence delta (500m site vs 15km city polygon).
+  // Fallback: fixture calibration table, used only when no API key is configured or
+  // the live call fails/times out — this is the "Graceful High-Fidelity Fallback".
   let uhiDeltaC = 3.2;
   const locLower = location.toLowerCase();
-  if (locLower.includes('dharavi')) uhiDeltaC = 4.2;
+  if (fortyGuardTelemetry?.uhiDeltaC !== null && fortyGuardTelemetry?.uhiDeltaC !== undefined) {
+    uhiDeltaC = fortyGuardTelemetry.uhiDeltaC;
+  } else if (locLower.includes('dharavi')) uhiDeltaC = 4.2;
   else if (locLower.includes('bkc') || locLower.includes('bandra')) uhiDeltaC = 3.8;
   else if (locLower.includes('vashi') || locLower.includes('navi mumbai')) uhiDeltaC = 2.9;
   else if (locLower.includes('noida') || locLower.includes('sec-62') || locLower.includes('sector 62')) uhiDeltaC = 3.6;
   else if (locLower.includes('jaipur') || locLower.includes('sitapura')) uhiDeltaC = 4.5;
   else if (locLower.includes('gurgaon') || locLower.includes('cyber city')) uhiDeltaC = 3.9;
+
+  const dataSource: 'fortyguard-live' | 'open-meteo' | 'fixture' = fortyGuardTelemetry
+    ? 'fortyguard-live'
+    : liveHourlyWeather
+    ? 'open-meteo'
+    : 'fixture';
 
   // Hours: 6 AM to 6 PM (index 6 to 18)
   const targetHourIndices = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
@@ -145,7 +283,22 @@ function buildOccupationalHeatProfile(
     let wind = 12;
     let solarWm2 = 450;
 
-    if (liveHourlyWeather && liveHourlyWeather.temperature_2m && liveHourlyWeather.temperature_2m[hIdx] !== undefined) {
+    const currentUtcHour = new Date().getUTCHours();
+    // FortyGuard has no wind field, so wind always comes from Open-Meteo
+    // when available, regardless of which branch supplies temp/humidity/solar.
+    if (liveHourlyWeather?.wind_speed_10m?.[hIdx] !== undefined) {
+      wind = Math.round(liveHourlyWeather.wind_speed_10m[hIdx]);
+    }
+
+    if (fortyGuardTelemetry && hIdx === currentUtcHour && fortyGuardTelemetry.siteTempC !== null) {
+      // Anchor the current hour to the real FortyGuard reading; other hours
+      // still come from Open-Meteo/synthetic shape since we only fetch one
+      // FortyGuard reading per request to stay credit-efficient.
+      rawTemp = Math.round(fortyGuardTelemetry.siteTempC);
+      humidity = Math.round(fortyGuardTelemetry.humidity ?? 50);
+      solarWm2 = Math.round(fortyGuardTelemetry.solarWm2 ?? 450);
+      uv = Math.round(solarWm2 / 100);
+    } else if (liveHourlyWeather && liveHourlyWeather.temperature_2m && liveHourlyWeather.temperature_2m[hIdx] !== undefined) {
       rawTemp = Math.round(liveHourlyWeather.temperature_2m[hIdx]);
       humidity = Math.round(liveHourlyWeather.relative_humidity_2m?.[hIdx] ?? 50);
       uv = Math.round(liveHourlyWeather.uv_index?.[hIdx] ?? 6);
@@ -213,6 +366,7 @@ function buildOccupationalHeatProfile(
       confidence,
       solarWm2,
       windMs: Math.round((wind / 3.6) * 10) / 10,
+      windKmh: Math.round(wind * 10) / 10,
     };
   });
 
@@ -333,11 +487,23 @@ function buildOccupationalHeatProfile(
     {
       stageNumber: 2,
       name: 'Fetch Agent',
-      agentRole: 'FortyGuard Hyperlocal Telemetry Ingest',
+      agentRole: dataSource === 'fortyguard-live'
+        ? 'FortyGuard Hyperlocal Telemetry Ingest'
+        : dataSource === 'open-meteo'
+        ? 'Open-Meteo Regional Telemetry Ingest (FortyGuard fallback)'
+        : 'Deterministic Fixture Telemetry (offline fallback)',
       status: 'completed' as const,
       durationMs: 380,
-      details: `Retrieved hourly air temp, relative humidity, solar zenith radiation, and wind vector grids across 13 hourly intervals.`,
-      outputSummary: `Telemetry locked: Peak ambient ${peakTemp}°C, City baseline ${cityBaselineTempC}°C (UHI delta: +${uhiDeltaC}°C).`,
+      details: dataSource === 'fortyguard-live'
+        ? `Retrieved live 500m-site vs 15km-city heat-intelligence readings and environmental parameters from the FortyGuard Enterprise API.`
+        : dataSource === 'open-meteo'
+        ? fortyGuardSkipReason === 'outside-us-coverage'
+          ? `FortyGuard's current release covers United States locations only (per their published API limitations) — this site is outside that region, so hourly air temp, humidity, solar, and wind were retrieved live from Open-Meteo instead.`
+          : fortyGuardSkipReason === 'no-key'
+          ? `No FortyGuard API key configured — retrieved hourly air temp, humidity, solar, and wind from Open-Meteo as the live-data source.`
+          : `FortyGuard call did not return usable data — retrieved hourly air temp, humidity, solar, and wind from Open-Meteo as a live-data fallback.`
+        : `No live telemetry available — used deterministic high-fidelity fixture curve for this microclimate.`,
+      outputSummary: `Telemetry locked: Peak ambient ${peakTemp}°C, City baseline ${cityBaselineTempC}°C (UHI delta: +${uhiDeltaC}°C). Source: ${dataSource}.`,
     },
     {
       stageNumber: 3,
@@ -384,11 +550,20 @@ function buildOccupationalHeatProfile(
     activityType: activityType as any,
     plannedHours: `${startTime} – ${endTime}`,
     thresholdTemp,
+    dataSource,
+    fortyGuardNote:
+      dataSource === 'open-meteo'
+        ? fortyGuardSkipReason === 'outside-us-coverage'
+          ? "FortyGuard's current release covers United States locations only — this site is outside that region, so live telemetry comes from Open-Meteo instead."
+          : fortyGuardSkipReason === 'no-key'
+          ? 'No FortyGuard API key configured — live telemetry comes from Open-Meteo instead.'
+          : "FortyGuard call didn't return usable data for this request — live telemetry comes from Open-Meteo instead."
+        : undefined,
     currentTemp: currentMidHour.tempC,
     currentHeatIndex: currentMidHour.heatIndexC,
     currentHumidity: currentMidHour.humidity,
     currentUvIndex: currentMidHour.uvIndex,
-    currentWindSpeed: 14,
+    currentWindSpeed: currentMidHour.windKmh,
     overallVerdict,
     decisionStatus,
     goNoGoReason,
@@ -497,8 +672,22 @@ app.post('/api/analyze-heat', async (req, res) => {
   // 1. Geocode location to get real lat/lon
   const { lat, lon, displayName } = await geocodeLocation(location);
 
-  // 2. Fetch live real-world hourly weather data from Open-Meteo
+  // Reason FortyGuard live data won't be used, for accurate UI messaging —
+  // computed up front so the "Fetch Agent" stage can report a specific,
+  // truthful cause instead of a generic "unavailable".
+  const fortyGuardSkipReason: 'no-key' | 'outside-us-coverage' | null = !FORTYGUARD_API_KEY
+    ? 'no-key'
+    : !isWithinFortyGuardCoverage(lat, lon)
+    ? 'outside-us-coverage'
+    : null;
+
+  // 2. Fetch live real-world hourly weather data from Open-Meteo (baseline/fallback)
   const liveWeather = await fetchRealWeatherTelemetry(lat, lon);
+
+  // 2b. Fetch real hyperlocal UHI delta + env readings from FortyGuard, if configured.
+  // Returns null (never throws) on missing key, bad schema guess, or timeout —
+  // the pipeline gracefully degrades to Open-Meteo/fixture data in that case.
+  const fortyGuardTelemetry = await fetchFortyGuardTelemetry(lat, lon, liveWeather);
 
   // 3. Compute baseline ISO 7243 occupational heat model
   const baseResult = buildOccupationalHeatProfile(
@@ -511,7 +700,9 @@ app.post('/api/analyze-heat', async (req, res) => {
     isAcclimatized,
     hasShade,
     hasWater,
-    liveWeather
+    liveWeather,
+    fortyGuardTelemetry,
+    fortyGuardSkipReason
   );
 
   let finalResult = baseResult;
@@ -579,9 +770,13 @@ EVALUATE AND RETURN JSON STRICTLY WITH:
   }
 
   // Store in cache
-  heatAnalysisCache.set(cacheKey, { data: finalResult, timestamp: Date.now() });
+  // Expose the resolved coordinates so the client can request a FortyGuard
+  // Heat Intelligence PDF for this exact site without re-geocoding.
+  const responsePayload = { ...finalResult, latitude: lat, longitude: lon };
 
-  return res.json(finalResult);
+  heatAnalysisCache.set(cacheKey, { data: responsePayload, timestamp: Date.now() });
+
+  return res.json(responsePayload);
 });
 
 // Crew SMS / WhatsApp Alert Dispatch Gateway Endpoint
@@ -618,6 +813,65 @@ app.post('/api/send-alert', (req, res) => {
   });
 });
 
+// Heat Intelligence PDF Report — Generation Endpoint
+//
+// heat_intelligence is deliberately kept OUT of the main /api/analyze-heat
+// pipeline: it returns no numbers, generation can take several minutes, and
+// it's billed as a separate Premium-tier activity. It's exposed here as an
+// explicit, user-triggered action instead (e.g. a "Generate Detailed
+// Report" button), so it never fires — and never spends credits — unless
+// someone actually asks for it.
+app.post('/api/generate-report', async (req, res) => {
+  if (!FORTYGUARD_API_KEY) {
+    return res.status(503).json({ error: 'FortyGuard API key not configured' });
+  }
+
+  const { latitude, longitude, temperatureC, date, analysis } = req.body || {};
+  if (typeof latitude !== 'number' || typeof longitude !== 'number' || typeof temperatureC !== 'number') {
+    return res.status(400).json({ error: 'latitude, longitude, and temperatureC (number) are required' });
+  }
+
+  const categories: Array<'geographic' | 'environmental' | 'urban' | 'events' | 'anthropogenic'> =
+    Array.isArray(analysis) && analysis.length ? analysis : ['environmental'];
+  const reportDate = date || new Date().toISOString().slice(0, 10);
+
+  try {
+    const activityId = await submitHeatIntelligenceReport(
+      FORTYGUARD_API_KEY,
+      latitude,
+      longitude,
+      celsiusToFahrenheit(temperatureC),
+      reportDate,
+      categories
+    );
+    return res.json({ activityId, status: 'Processing' });
+  } catch (err) {
+    console.warn('heat_intelligence submit failed:', err instanceof Error ? err.message : err);
+    return res.status(502).json({ error: 'Failed to submit report request to FortyGuard' });
+  }
+});
+
+// Heat Intelligence PDF Report — Status/Polling Endpoint
+//
+// Frontend should call this every few seconds while status is "Processing".
+// Per FortyGuard's docs: stop polling once status is "Completed" (and use
+// download_link immediately — it's a temporary signed URL) or "Failed"
+// (terminal, do not retry the same activity_id).
+app.get('/api/report-status/:activityId', async (req, res) => {
+  if (!FORTYGUARD_API_KEY) {
+    return res.status(503).json({ error: 'FortyGuard API key not configured' });
+  }
+  try {
+    const data = await checkStatus(FORTYGUARD_API_KEY, req.params.activityId);
+    const status = data?.status || 'Unknown';
+    const downloadLink = data?.result?.download_link ?? null;
+    return res.json({ status, downloadLink });
+  } catch (err) {
+    console.warn('heat_intelligence status check failed:', err instanceof Error ? err.message : err);
+    return res.status(502).json({ error: 'Failed to check report status' });
+  }
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
@@ -639,4 +893,3 @@ async function startServer() {
 }
 
 startServer();
-

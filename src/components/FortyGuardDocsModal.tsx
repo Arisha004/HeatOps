@@ -42,15 +42,31 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
 
   const samplePolygonPayload = JSON.stringify(
     {
-      polygon: [
-        [72.8493, 19.0335],
-        [72.8583, 19.0335],
-        [72.8583, 19.0425],
-        [72.8493, 19.0425],
-        [72.8493, 19.0335],
-      ],
-      date: new Date().toISOString().split('T')[0],
-      variables: ['temperature_2m', 'relative_humidity', 'solar_zenith_irradiance', 'wind_vector_10m'],
+      polygon_aoi: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: [[
+                [72.8493, 19.0335],
+                [72.8583, 19.0335],
+                [72.8583, 19.0425],
+                [72.8493, 19.0425],
+                [72.8493, 19.0335],
+              ]],
+            },
+          },
+        ],
+      },
+      date_time: {
+        start_date: new Date().toISOString().split('T')[0],
+        start_time: '14:00',
+        filter_type: 1,
+      },
+      granularity: 100,
     },
     null,
     2
@@ -58,25 +74,28 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
 
   const sampleStatusPollResponse = JSON.stringify(
     {
-      activity_id: 'act_40g_mumbai_dharavi_8f9a2',
-      status: 'completed',
-      progress: 1.0,
-      result: {
-        site_peak_temp_c: 42.8,
-        city_baseline_temp_c: 38.6,
-        uhi_delta_c: 4.2,
-        hourly_series: [
-          { hour: '06:00', temp_c: 29.4, rh_pct: 68, solar_wm2: 120, wind_ms: 2.8 },
-          { hour: '09:00', temp_c: 34.2, rh_pct: 54, solar_wm2: 540, wind_ms: 3.1 },
-          { hour: '12:00', temp_c: 41.5, rh_pct: 42, solar_wm2: 890, wind_ms: 2.4 },
-          { hour: '15:00', temp_c: 42.8, rh_pct: 39, solar_wm2: 780, wind_ms: 2.9 },
-          { hour: '18:00', temp_c: 36.1, rh_pct: 58, solar_wm2: 180, wind_ms: 3.4 },
-        ],
+      error: false,
+      status_code: 200,
+      message: 'Completed',
+      data: {
+        activity_id: 'f52d2453-6a59-4b31-afa3-8fe3bb1ac5df',
+        status: 'Completed',
+        result: {
+          stats_data: {
+            Temperature_stats: {
+              Minimum: 36.1,
+              Maximum: 42.8,
+              Mean: 39.9,
+              Standard_deviation: 1.6,
+            },
+          },
+        },
       },
     },
     null,
     2
   );
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/70 backdrop-blur-xs overflow-y-auto animate-fadeIn">
@@ -255,21 +274,21 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
                   <tbody className="divide-y divide-neutral-200 font-mono text-[11px]">
                     <tr>
                       <td className="p-2.5 font-bold text-blue-700">POST</td>
-                      <td className="p-2.5 font-bold text-neutral-900">/v1/heat_intelligence</td>
-                      <td className="p-2.5 font-sans text-neutral-600">Hourly ambient temperature series & grid heat layers</td>
+                      <td className="p-2.5 font-bold text-neutral-900">/v1/heatmap</td>
+                      <td className="p-2.5 font-sans text-neutral-600">Area temperature stats (Mean/Min/Max) — site cell vs city baseline, powers the UHI Delta</td>
                       <td className="p-2.5 text-emerald-700 font-bold font-sans">Active & Integrated</td>
                     </tr>
                     <tr>
                       <td className="p-2.5 font-bold text-blue-700">POST</td>
                       <td className="p-2.5 font-bold text-neutral-900">/v1/env_params</td>
-                      <td className="p-2.5 font-sans text-neutral-600">Relative humidity, wind vectors, and solar radiation flux</td>
+                      <td className="p-2.5 font-sans text-neutral-600">Point-level heat index, humidity, air quality, and solar irradiance</td>
                       <td className="p-2.5 text-emerald-700 font-bold font-sans">Active & Integrated</td>
                     </tr>
                     <tr>
                       <td className="p-2.5 font-bold text-blue-700">POST</td>
-                      <td className="p-2.5 font-bold text-neutral-900">/v1/heatmap</td>
-                      <td className="p-2.5 font-sans text-neutral-600">Site cell vs city baseline (UHI Delta computation)</td>
-                      <td className="p-2.5 text-emerald-700 font-bold font-sans">Active & Integrated</td>
+                      <td className="p-2.5 font-bold text-neutral-900">/v1/heat_intelligence</td>
+                      <td className="p-2.5 font-sans text-neutral-600">Async multi-page PDF intelligence report (geographic/environmental/urban/events/anthropogenic)</td>
+                      <td className="p-2.5 text-emerald-700 font-bold font-sans">Available on demand</td>
                     </tr>
                     <tr>
                       <td className="p-2.5 font-bold text-emerald-700">GET</td>
@@ -278,10 +297,10 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
                       <td className="p-2.5 text-emerald-700 font-bold font-sans">Active & Integrated</td>
                     </tr>
                     <tr>
-                      <td className="p-2.5 font-bold text-blue-700">POST</td>
-                      <td className="p-2.5 font-bold text-neutral-900">/v1/system/fetch-api-key-usage</td>
-                      <td className="p-2.5 font-sans text-neutral-600">Quota monitoring and rate limit protection</td>
-                      <td className="p-2.5 text-emerald-700 font-bold font-sans">Active & Integrated</td>
+                      <td className="p-2.5 font-bold text-emerald-700">GET</td>
+                      <td className="p-2.5 font-bold text-neutral-900">/v1/credits-usage</td>
+                      <td className="p-2.5 font-sans text-neutral-600">Quota / credits usage monitoring</td>
+                      <td className="p-2.5 text-amber-600 font-bold font-sans">Not yet integrated</td>
                     </tr>
                   </tbody>
                 </table>
@@ -291,7 +310,7 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-neutral-900 text-xs">
-                    Sample 1: Point-to-Polygon 500m Buffer Payload (POST /v1/heat_intelligence)
+                    Sample 1: 500m Site Polygon Buffer Payload (POST /v1/heatmap)
                   </span>
                   <button
                     onClick={() => handleCopy(samplePolygonPayload, 'poly')}

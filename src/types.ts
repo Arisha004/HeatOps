@@ -34,7 +34,8 @@ export interface HourlyRisk {
   confidence: 'high' | 'moderate' | 'low';
   isUnknown?: boolean;
   solarWm2?: number;
-  windMs?: number;
+  windMs?: number;   // m/s — used only for internal WBGT convective cooling math
+  windKmh?: number;  // km/h — the raw Open-Meteo reading; use this for any display
 }
 
 export interface PipelineStageLog {
@@ -60,6 +61,10 @@ export interface RiskAnalysisResult {
   activityType: ActivityType;
   plannedHours: string;
   thresholdTemp: number;
+  dataSource?: 'fortyguard-live' | 'open-meteo' | 'fixture';
+  latitude?: number;  // resolved site coordinates, needed for the FortyGuard report request
+  longitude?: number;
+  fortyGuardNote?: string; // human-readable reason FortyGuard live data wasn't used, when applicable
   currentTemp: number;
   currentHeatIndex: number;
   currentHumidity: number;
@@ -112,4 +117,3 @@ export interface PredefinedSitePreset {
   waterAvailable?: boolean;
   description?: string;
 }
-

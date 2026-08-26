@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { RiskAnalysisResult } from '../types';
 import { AuthProfile } from '../lib/supabase';
 import { generateHeatRiskPdfReport } from '../lib/pdfReport';
@@ -17,7 +17,9 @@ import {
   Download,
   FileDown,
   Loader2,
-  FileSpreadsheet
+  FileSpreadsheet,
+  FileBarChart2,
+  AlertTriangle
 } from 'lucide-react';
 
 interface VerdictAndStatsProps {
@@ -39,6 +41,22 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [isExportingCsv, setIsExportingCsv] = useState(false);
   const [csvSuccess, setCsvSuccess] = useState(false);
+
+  // FortyGuard Heat Intelligence report (async, opt-in - each run costs Premium credits)
+  type FgReportState = 'idle' | 'submitting' | 'processing' | 'ready' | 'error';
+  const [fgState, setFgState] = useState<FgReportState>('idle');
+  const [fgLink, setFgLink] = useState<string | null>(null);
+  const [fgError, setFgError] = useState<string | null>(null);
+  const fgPollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fgCancelledRef = useRef(false);
+
+  // Stop polling if the component unmounts or a new analysis is loaded.
+  useEffect(() => {
+    return () => {
+      fgCancelledRef.current = true;
+      if (fgPollRef.current) clearTimeout(fgPollRef.current);
+    };
+  }, []);
 
   const isNoGo = analysis.decisionStatus === 'NO-GO';
   const isAdjust = analysis.decisionStatus === 'ADJUST';
@@ -115,6 +133,86 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
     }, 250);
   };
 
+  // FortyGuard's Heat Intelligence endpoint only accepts United States
+  // coordinates, so the button is only offered for sites inside that box -
+  // elsewhere the request is guaranteed to come back empty.
+  const hasCoords =
+    typeof analysis.latitude === 'number' && typeof analysis.longitude === 'number';
+  const inFgCoverage =
+    hasCoords &&
+    analysis.latitude! >= 24 &&
+    analysis.latitude! <= 50 &&
+    analysis.longitude! >= -125 &&
+    analysis.longitude! <= -66;
+
+  const handleGenerateFgReport = async () => {
+    if (fgState === 'submitting' || fgState === 'processing') return;
+    fgCancelledRef.current = false;
+    setFgError(null);
+    setFgLink(null);
+    setFgState('submitting');
+
+    try {
+      const res = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: analysis.latitude,
+          longitude: analysis.longitude,
+          temperatureC: analysis.currentTemp,
+          analysis: ['environmental'],
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setFgError(data?.error || `Request failed (${res.status})`);
+        setFgState('error');
+        return;
+      }
+
+      setFgState('processing');
+
+      // Poll until Completed/Failed. FortyGuard reports take minutes, so this
+      // backs off to a 5s interval and gives up after ~3 minutes rather than
+      // polling forever.
+      let attempts = 0;
+      const poll = async () => {
+        if (fgCancelledRef.current) return;
+        attempts += 1;
+        try {
+          const sres = await fetch(`/api/report-status/${encodeURIComponent(data.activityId)}`);
+          const sdata = await sres.json().catch(() => ({}));
+          if (fgCancelledRef.current) return;
+
+          if (sdata?.status === 'Completed' && sdata?.downloadLink) {
+            setFgLink(sdata.downloadLink);
+            setFgState('ready');
+            return;
+          }
+          if (sdata?.status === 'Failed') {
+            setFgError('FortyGuard could not generate this report.');
+            setFgState('error');
+            return;
+          }
+          if (attempts >= 36) {
+            setFgError('Report is still processing - try again shortly.');
+            setFgState('error');
+            return;
+          }
+          fgPollRef.current = setTimeout(poll, 5000);
+        } catch {
+          if (fgCancelledRef.current) return;
+          setFgError('Lost connection while checking report status.');
+          setFgState('error');
+        }
+      };
+      fgPollRef.current = setTimeout(poll, 5000);
+    } catch {
+      setFgError('Could not reach the report service.');
+      setFgState('error');
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* 1. Plain Language Verdict Banner */}
@@ -175,6 +273,52 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
                   : (language === 'en' ? 'Export PDF' : 'पीडीएफ डाउनलोड')}
               </span>
             </button>
+
+            {/* FortyGuard Heat Intelligence report - opt-in; consumes Premium API credits */}
+            {inFgCoverage && (
+              fgState === 'ready' && fgLink ? (
+                <a
+                  id="btn-fg-report-download"
+                  href={fgLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-900 text-xs font-medium transition-colors cursor-pointer"
+                  title="Download the completed FortyGuard Heat Intelligence report"
+                >
+                  <Download className="w-3.5 h-3.5 text-sky-700" />
+                  <span>{language === 'en' ? 'Download Heat Report' : 'हीट रिपोर्ट डाउनलोड'}</span>
+                </a>
+              ) : (
+                <button
+                  id="btn-fg-generate-report"
+                  onClick={handleGenerateFgReport}
+                  disabled={fgState === 'submitting' || fgState === 'processing'}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-900 text-xs font-medium transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                  title={
+                    fgState === 'error' && fgError
+                      ? fgError
+                      : 'Request a FortyGuard Heat Intelligence PDF (uses Premium API credits)'
+                  }
+                >
+                  {fgState === 'submitting' || fgState === 'processing' ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-sky-700" />
+                  ) : fgState === 'error' ? (
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                  ) : (
+                    <FileBarChart2 className="w-3.5 h-3.5 text-sky-700" />
+                  )}
+                  <span>
+                    {fgState === 'submitting'
+                      ? (language === 'en' ? 'Requesting...' : 'अनुरोध भेजा जा रहा...')
+                      : fgState === 'processing'
+                      ? (language === 'en' ? 'Building Report...' : 'रिपोर्ट बन रही है...')
+                      : fgState === 'error'
+                      ? (language === 'en' ? 'Retry Heat Report' : 'पुनः प्रयास करें')
+                      : (language === 'en' ? 'Heat Intelligence Report' : 'हीट इंटेलिजेंस रिपोर्ट')}
+                  </span>
+                </button>
+              )
+            )}
           </div>
         </div>
         <p id="verdict-text" className="text-base sm:text-lg font-bold text-neutral-900 leading-snug">
@@ -243,8 +387,17 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         {/* FortyGuard Decision Banner / Pitch Callout */}
         <div className="p-3.5 rounded-xl bg-orange-50/80 border border-orange-200 text-orange-950 text-xs sm:text-sm font-medium leading-snug">
           <span className="font-bold text-orange-900 block mb-0.5">
-            {language === 'en' ? 'Hyperlocal FortyGuard Risk Recommendation:' : 'हाइपरलोकल तापमान जोखिम सिफारिश:'}
+            {analysis.dataSource === 'fortyguard-live'
+              ? (language === 'en' ? 'Hyperlocal FortyGuard Risk Recommendation:' : 'हाइपरलोकल तापमान जोखिम सिफारिश:')
+              : analysis.dataSource === 'open-meteo'
+              ? (language === 'en' ? 'Risk Recommendation (Open-Meteo live telemetry):' : 'जोखिम सिफारिश (Open-Meteo लाइव डेटा):')
+              : (language === 'en' ? 'Risk Recommendation (offline fixture data):' : 'जोखिम सिफारिश (ऑफ़लाइन डेटा):')}
           </span>
+          {analysis.dataSource === 'open-meteo' && analysis.fortyGuardNote && (
+            <span className="block text-[11px] sm:text-xs text-orange-800/80 font-normal mb-1.5">
+              {analysis.fortyGuardNote}
+            </span>
+          )}
           "Your site runs <strong className="text-orange-900 font-bold">{uhiDelta}°C hotter</strong> than the {cityName} average, and stays above the safe threshold for <strong className="text-orange-900 font-bold">{exceedance} straight hours</strong>. Move the {analysis.activityType.toLowerCase()} to <strong className="text-emerald-800 font-bold font-mono bg-white px-1.5 py-0.5 rounded border border-orange-200">{safestWin}</strong> and you keep all <strong className="text-orange-900 font-bold">{crew} workers</strong>."
         </div>
 

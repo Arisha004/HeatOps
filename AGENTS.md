@@ -24,23 +24,22 @@ Both API keys stay server-side. The browser never sees either — all FortyGuard
 
 ## 2. FortyGuard API — confirmed surface
 
-Pulled from `https://api.fortyguard.com/openapi.json` (FastAPI `v1.0.1-beta`).
+Pulled from `https://docs-api.fortyguard.com` (confirmed live, Aug 2026).
 
 | Method | Path | Use in MVP |
 |---|---|---|
-| POST | `/v1/heat_intelligence` | primary hourly temperature series |
-| POST | `/v1/env_params` | humidity / wind / solar |
-| POST | `/v1/heatmap` | site cell vs city baseline → UHI delta |
+| POST | `/v1/heatmap` | site polygon vs city polygon → `Temperature_stats.Mean` → **UHI delta** (the only area-aggregating endpoint) |
+| POST | `/v1/env_params` | point-level heat index / humidity / AQI / solar (input temperature in **°C**; no wind field) |
+| POST | `/v1/heat_intelligence` | **not** a numeric source — returns an async, several-minutes PDF report (input temperature in **°F**). Exposed as an explicit "Generate Report" action, not part of the automatic pipeline |
 | GET | `/v1/status/{activity_id}` | **poll for result** |
-| POST | `/v1/hackathon-registration` | get the API key |
-| POST | `/v1/system/fetch-api-key-usage` | quota check |
+| GET | `/v1/credits-usage` | quota check (not yet integrated) |
 | POST | `/v1/satellite`, `/v1/streetview` | **not in MVP** |
 
 ### Three facts that shape the build
 
 1. **Every data call is async.** POST returns an `activity_id`; you poll `GET /v1/status/{activity_id}` until it resolves. No FortyGuard call is a synchronous function.
-2. **There is no exceedance endpoint and no persistence endpoint.** Those are metrics *we* compute from the hourly series — they live in `risk/`, not `tools/`. This is our IP, not an API passthrough.
-3. **Quota is metered.** The cache is mandatory, not an optimisation.
+2. **Wind has no FortyGuard source.** Neither `heatmap`, `env_params`, nor `heat_intelligence` returns wind speed — it comes from Open-Meteo in every code path.
+3. **Quota is metered, and `heat_intelligence` is Premium-tier and slow.** The cache is mandatory, and the PDF-report endpoint must stay opt-in (a user action), never triggered automatically per analysis.
 
 ### Phase 0 Fixtures & Demo Fallback
 
