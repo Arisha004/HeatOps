@@ -62,6 +62,8 @@ export interface RiskAnalysisResult {
   plannedHours: string;
   thresholdTemp: number;
   dataSource?: 'fortyguard-live' | 'open-meteo' | 'fixture';
+  latitude?: number;  // resolved site coordinates, needed for the FortyGuard report request
+  longitude?: number;
   fortyGuardNote?: string; // human-readable reason FortyGuard live data wasn't used, when applicable
   currentTemp: number;
   currentHeatIndex: number;

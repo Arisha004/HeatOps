@@ -44,15 +44,23 @@ async function poll(activityId, { maxAttempts = 15, intervalMs = 2000 } = {}) {
   throw new Error(`activity ${activityId} did not complete in time`);
 }
 
-// Small 500m box over Mumbai (site) — mirrors lib/fortyguard.ts:siteBox()
+// Small ~500m box over downtown Phoenix, Arizona — mirrors lib/fortyguard.ts:siteBox().
+// MUST be a United States coordinate: FortyGuard's current release only covers
+// the US (docs-api.fortyguard.com/docs/limitations, "Regional Coverage"), and
+// out-of-region requests return "Completed" with n_cells: 0 rather than an
+// error — which would burn both credits and prove nothing.
+const SITE_LAT = 33.4484;
+const SITE_LON = -112.0740;
 const siteRing = [
-  [72.8547, 19.0385],
-  [72.8593, 19.0385],
-  [72.8593, 19.0475],
-  [72.8547, 19.0475],
-  [72.8547, 19.0385],
+  [-112.0767, 33.4462],
+  [-112.0713, 33.4462],
+  [-112.0713, 33.4507],
+  [-112.0767, 33.4507],
+  [-112.0767, 33.4462],
 ];
 
+let heatmapOk = true;
+let envParamsOk = true;
 console.log('--- 1/2: POST /v1/heatmap (site polygon -> Temperature_stats) ---');
 {
   const activityId = await submit('/v1/heatmap', {
@@ -65,22 +73,53 @@ console.log('--- 1/2: POST /v1/heatmap (site polygon -> Temperature_stats) ---')
     analytic_type: 'tcm',
   });
   const data = await poll(activityId);
-  const stats = data?.result?.stats_data?.Temperature_stats;
-  console.log('PASS — Temperature_stats:', JSON.stringify(stats));
+  const statsData = data?.result?.stats_data;
+  const stats = statsData?.Temperature_stats ?? statsData?.temperature_stats;
+  console.log('Temperature_stats:', JSON.stringify(stats));
+  console.log('n_cells:', statsData?.n_cells);
+  const mean = stats?.Mean ?? stats?.mean;
+  if (typeof mean !== 'number') {
+    // A "Completed" activity with no cells is NOT a pass. Reporting it as one
+    // hides the fact that the UHI delta will be unavailable at demo time.
+    heatmapOk = false;
+    console.log(
+      'FAIL — heatmap completed but returned no Temperature_stats ' +
+      `(n_cells: ${statsData?.n_cells}). The site-vs-city UHI delta will be ` +
+      'unavailable; env_params readings are still used.'
+    );
+  }
+  if (typeof mean === 'number') {
+    // Unit sanity check: a US summer surface reading near 95 is Fahrenheit;
+    // near 35 it is Celsius. server.ts treats this value as CELSIUS.
+    console.log(`       UNIT CHECK -> Mean=${mean}  =>  looks like ${mean > 60 ? 'FAHRENHEIT (server.ts treats it as CELSIUS - BUG)' : 'CELSIUS (matches server.ts)'}`);
+  }
 }
 
 console.log('\n--- 2/2: POST /v1/env_params (point -> heat index / humidity / AQI) ---');
 {
   const activityId = await submit('/v1/env_params', {
-    latitude: 19.043,
-    longitude: 72.857,
+    latitude: SITE_LAT,
+    longitude: SITE_LON,
     temperature: 32, // Celsius
     date_time: { start_date: today, start_time: '14:00', filter_type: 1 },
     analysis: ['heat_index_celsius', 'relative_humidity_percent', 'air_quality:idx'],
   });
   const data = await poll(activityId);
   const loc = data?.result?.locations?.[0];
-  console.log('PASS — parameters:', JSON.stringify(loc?.parameters));
+  const params = loc?.parameters;
+  if (!params || !Object.keys(params).length) {
+    envParamsOk = false;
+    console.log('FAIL — env_params returned no parameters.');
+  } else {
+    console.log('PASS — parameters:', JSON.stringify(params));
+  }
 }
 
+console.log('\n--- SUMMARY ---');
+console.log(`/v1/heatmap    : ${heatmapOk ? 'PASS' : 'NO DATA (UHI delta unavailable)'}`);
+console.log(`/v1/env_params : ${envParamsOk ? 'PASS' : 'FAIL'}`);
+if (!heatmapOk || !envParamsOk) {
+  console.log('\nFortyGuard integration is only PARTIALLY working. See failures above.');
+  process.exit(1);
+}
 console.log('\nAll checks passed. FortyGuard integration is working end to end.');

@@ -22,7 +22,10 @@ const FORTYGUARD_API_KEY = process.env.FORTYGUARD_API_KEY || '';
 
 interface FortyGuardTelemetry {
   source: 'fortyguard-live';
-  siteTempC: number;
+  // null when /v1/heatmap returns no cells for the AOI. env_params readings
+  // below can still be valid in that case, so this is not an all-or-nothing
+  // signal - callers must fall back to Open-Meteo for temperature only.
+  siteTempC: number | null;
   cityTempC: number | null;
   uhiDeltaC: number | null;
   humidity: number | null;
@@ -95,18 +98,28 @@ async function fetchFortyGuardTelemetry(lat: number, lon: number, liveHourlyWeat
       }),
     ]);
 
+    // /v1/heatmap regularly completes with n_cells: 0 (no surface cells for the
+    // AOI). Previously that discarded the whole telemetry object - including
+    // the env_params readings we had already paid credits for - and silently
+    // dropped the request to Open-Meteo. Keep whatever we actually got: the
+    // UHI delta degrades to null, the environmental readings survive.
     if (siteStats.mean === null) {
-      console.warn('FortyGuard heatmap returned no parseable Temperature_stats. Raw payload:', JSON.stringify(siteStats.raw));
-      return null;
+      console.warn(
+        `FortyGuard /v1/heatmap returned no Temperature_stats (n_cells: ${siteStats.nCells}). ` +
+        'UHI delta unavailable for this site; env_params readings are still used if present.'
+      );
+      if (!envParams || (envParams.heatIndexC === null && envParams.humidity === null)) {
+        return null; // nothing usable from either endpoint
+      }
     }
 
-    const uhiDeltaC = cityStats.mean !== null
+    const uhiDeltaC = siteStats.mean !== null && cityStats.mean !== null
       ? Math.round((siteStats.mean - cityStats.mean) * 10) / 10
       : null;
 
     return {
       source: 'fortyguard-live' as const,
-      siteTempC: Math.round(siteStats.mean * 10) / 10,
+      siteTempC: siteStats.mean !== null ? Math.round(siteStats.mean * 10) / 10 : null,
       cityTempC: cityStats.mean !== null ? Math.round(cityStats.mean * 10) / 10 : null,
       uhiDeltaC,
       humidity: envParams?.humidity ?? null,
@@ -277,7 +290,7 @@ function buildOccupationalHeatProfile(
       wind = Math.round(liveHourlyWeather.wind_speed_10m[hIdx]);
     }
 
-    if (fortyGuardTelemetry && hIdx === currentUtcHour) {
+    if (fortyGuardTelemetry && hIdx === currentUtcHour && fortyGuardTelemetry.siteTempC !== null) {
       // Anchor the current hour to the real FortyGuard reading; other hours
       // still come from Open-Meteo/synthetic shape since we only fetch one
       // FortyGuard reading per request to stay credit-efficient.
@@ -757,9 +770,13 @@ EVALUATE AND RETURN JSON STRICTLY WITH:
   }
 
   // Store in cache
-  heatAnalysisCache.set(cacheKey, { data: finalResult, timestamp: Date.now() });
+  // Expose the resolved coordinates so the client can request a FortyGuard
+  // Heat Intelligence PDF for this exact site without re-geocoding.
+  const responsePayload = { ...finalResult, latitude: lat, longitude: lon };
 
-  return res.json(finalResult);
+  heatAnalysisCache.set(cacheKey, { data: responsePayload, timestamp: Date.now() });
+
+  return res.json(responsePayload);
 });
 
 // Crew SMS / WhatsApp Alert Dispatch Gateway Endpoint
