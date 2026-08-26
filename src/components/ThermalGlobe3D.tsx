@@ -3,10 +3,9 @@ import * as THREE from 'three';
 import { Sun, RotateCw, Flame, Info } from 'lucide-react';
 
 interface ThermalGlobe3DProps {
-  language: 'en' | 'hi';
 }
 
-export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
+export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedTime, setSelectedTime] = useState<'10am' | '1pm' | '4pm'>('1pm');
   const [currentTemp, setCurrentTemp] = useState<number>(43.5);
@@ -30,7 +29,6 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
       bandColor: 0xfbbf24,
       intensity: 1.4,
       labelEn: '10:00 AM (Early Surge)',
-      labelHi: 'सुबह 10:00 (शुरुआती गर्मी)',
       risk: 'CAUTION',
     },
     '1pm': {
@@ -41,7 +39,6 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
       bandColor: 0xd97706,
       intensity: 2.4,
       labelEn: '01:00 PM (Peak Solar Radiation)',
-      labelHi: 'दोपहर 01:00 (चरम विकिरण)',
       risk: 'CRITICAL NO-GO',
     },
     '4pm': {
@@ -52,7 +49,6 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
       bandColor: 0xea580c,
       intensity: 1.6,
       labelEn: '04:00 PM (Thermal Retention)',
-      labelHi: 'शाम 04:00 (ताप संचय)',
       risk: 'HIGH RISK',
     },
   };
@@ -125,7 +121,7 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
     const wireMesh = new THREE.Mesh(wireGeom, wireMat);
     globeMesh.add(wireMesh);
 
-    // North India 28°N Latitude Thermal Heat Ring
+    // US Sun Belt 33°N Latitude Thermal Heat Ring
     const bandGeom = new THREE.TorusGeometry(1.58, 0.08, 16, 64);
     const bandMat = new THREE.MeshBasicMaterial({
       color: 0xef4444,
@@ -134,7 +130,7 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
     });
     const heatBand = new THREE.Mesh(bandGeom, bandMat);
     heatBand.rotation.x = Math.PI / 2.3;
-    heatBand.position.y = 0.52; // Approximate 28°N latitude tilt
+    heatBand.position.y = 0.52; // Approximate 33°N latitude tilt
     heatBandMeshRef.current = heatBand;
     globeMesh.add(heatBand);
 
@@ -308,13 +304,13 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
           </div>
           <div>
             <h3 className="text-sm font-bold tracking-tight text-neutral-100 flex items-center gap-2">
-              <span>{language === 'en' ? '3D Solar Radiation & Thermal Dome' : '3D सौर विकिरण एवं हीट डोम मॉडल'}</span>
+              <span>3D Solar Radiation & Thermal Dome</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-red-950 text-red-400 border border-red-800 animate-pulse">
                 28°N LATITUDE
               </span>
             </h3>
             <p className="text-xs text-neutral-400">
-              {language === 'en' ? 'Simulating North India Sub-Tropical Heat Accumulation' : 'उत्तरी भारत का वास्तविक 3D सौर विकिरण मॉडल'}
+              Simulating US Sun Belt Heat Accumulation
             </p>
           </div>
         </div>
@@ -378,9 +374,9 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = ({ language }) => {
       {/* Interactive Time-of-Day Selectors */}
       <div className="space-y-2 relative z-10 pt-1">
         <div className="flex items-center justify-between text-xs text-neutral-400">
-          <span className="font-semibold">{language === 'en' ? 'Select Solar Exposure Window:' : 'सौर विकिरण समय चुनें:'}</span>
+          <span className="font-semibold">Select Solar Exposure Window:</span>
           <span className="text-[11px] font-mono text-amber-400">
-            {language === 'en' ? activeConfig.labelEn : activeConfig.labelHi}
+            {activeConfig.labelEn}
           </span>
         </div>
 

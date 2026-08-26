@@ -17,12 +17,10 @@ import { PipelineStageLog } from '../types';
 
 interface PipelineInspectionCardProps {
   stages: PipelineStageLog[];
-  language: 'en' | 'hi';
 }
 
 export const PipelineInspectionCard: React.FC<PipelineInspectionCardProps> = ({
   stages,
-  language,
 }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const totalDuration = (stages || []).reduce((acc, s) => acc + s.durationMs, 0);
@@ -47,16 +45,14 @@ export const PipelineInspectionCard: React.FC<PipelineInspectionCardProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm sm:text-base font-bold text-neutral-900 tracking-tight">
-                {language === 'en' ? '6-Stage Multi-Agent Safety Pipeline' : '6-चरणीय मल्टी-एजेंट सुरक्षा पाइपलाइन'}
+                6-Stage Multi-Agent Safety Pipeline
               </h3>
               <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 text-[10px] font-extrabold font-mono uppercase">
                 {totalDuration}ms TOTAL
               </span>
             </div>
             <p className="text-xs text-neutral-500">
-              {language === 'en'
-                ? 'Deterministic telemetry ingestion, ISO 7243 physics calculations, and safety verification trail'
-                : 'माइक्रोक्लाइमेट डेटा अंतर्ग्रहण, थर्मल भौतिकी गणना एवं सत्यापन प्रक्रिया'}
+              Deterministic telemetry ingestion, ISO 7243 physics calculations, and safety verification trail
             </p>
           </div>
         </div>
@@ -66,7 +62,7 @@ export const PipelineInspectionCard: React.FC<PipelineInspectionCardProps> = ({
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 text-xs font-bold transition-colors cursor-pointer"
         >
-          <span>{isExpanded ? (language === 'en' ? 'Collapse Stages' : 'संक्षिप्त करें') : (language === 'en' ? 'Inspect 6 Agents' : '6 एजेंट देखें')}</span>
+          <span>{isExpanded ? ('Collapse Stages') : ('Inspect 6 Agents')}</span>
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
       </div>

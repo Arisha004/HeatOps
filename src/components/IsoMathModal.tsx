@@ -17,13 +17,11 @@ import {
 interface IsoMathModalProps {
   isOpen: boolean;
   onClose: () => void;
-  language: 'en' | 'hi';
 }
 
 export const IsoMathModal: React.FC<IsoMathModalProps> = ({
   isOpen,
   onClose,
-  language,
 }) => {
   // Input parameters
   const [ambientTemp, setAmbientTemp] = useState<number>(40); // Ta
@@ -102,7 +100,7 @@ export const IsoMathModal: React.FC<IsoMathModalProps> = ({
                 ISO 7243:2017 & ACGIH Engine
               </span>
               <h2 className="text-base font-bold text-neutral-900 mt-0.5">
-                {language === 'en' ? 'Microclimate Thermal Lab & PPE Simulator' : 'थर्मल लैब और पीपीई सिम्युलेटर'}
+                Microclimate Thermal Lab & PPE Simulator
               </h2>
             </div>
           </div>

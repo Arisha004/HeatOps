@@ -12,7 +12,6 @@ interface SidebarProps {
   onNewSite: () => void;
   currentView: AppView;
   onNavigateView: (view: AppView) => void;
-  language: 'en' | 'hi';
   
   // Edge case state toggles
   isOffline: boolean;
@@ -38,7 +37,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNewSite,
   currentView,
   onNavigateView,
-  language,
   isOffline,
   onToggleOffline,
   isPartialData,
@@ -159,13 +157,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white font-medium text-sm hover:bg-neutral-800 transition-colors min-h-[44px] cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>{language === 'en' ? 'New Site Audit' : 'नया साइट मूल्यांकन'}</span>
+            <span>New Site Audit</span>
           </button>
 
           {/* Navigation Views */}
           <div className="space-y-1">
             <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider px-1 mb-2">
-              {language === 'en' ? 'Core Workspaces' : 'कार्यक्षेत्र'}
+              Core Workspaces
             </p>
 
             <button
@@ -181,7 +179,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }`}
             >
               <Layers className="w-4 h-4 text-neutral-500" />
-              <span>{language === 'en' ? 'Product Tour & 3D Lab' : 'सिस्टम विवरण एवं 3D लैब'}</span>
+              <span>Product Tour & 3D Lab</span>
             </button>
 
             <button
@@ -197,7 +195,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }`}
             >
               <ShieldCheck className="w-4 h-4 text-neutral-500" />
-              <span>{language === 'en' ? 'Active Site Dashboard' : 'लाइव साइट डैशबोर्ड'}</span>
+              <span>Active Site Dashboard</span>
             </button>
 
             {onOpenDocs && (
@@ -210,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-neutral-700 hover:bg-orange-50 hover:text-orange-900 transition-colors cursor-pointer"
               >
                 <Code className="w-4 h-4 text-orange-600" />
-                <span>{language === 'en' ? 'FortyGuard API & Specs' : 'FortyGuard API दस्तावेज़'}</span>
+                <span>FortyGuard API & Specs</span>
               </button>
             )}
           </div>
@@ -219,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
               <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
-                {language === 'en' ? 'Recent Site Audits' : 'हाल के मूल्यांकन'}
+                Recent Site Audits
               </p>
               <span className="text-[10px] font-mono bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded">
                 {savedAnalyses.length}
@@ -228,7 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {savedAnalyses.length === 0 ? (
               <div className="p-3 text-center rounded-lg border border-dashed border-neutral-200 text-xs text-neutral-400">
-                {language === 'en' ? 'No recent saved sites' : 'कोई सुरक्षित साइट नहीं'}
+                No recent saved sites
               </div>
             ) : (
               <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
@@ -279,7 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex items-center gap-1.5 px-1 text-neutral-500">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
               <p className="text-[11px] font-semibold uppercase tracking-wider">
-                {language === 'en' ? 'Edge-Case Simulators' : 'सिम्युलेटर मोड'}
+                Edge-Case Simulators
               </p>
             </div>
 
@@ -287,7 +285,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <label className="flex items-center justify-between p-2 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-700 cursor-pointer">
                 <span className="flex items-center gap-1.5">
                   <WifiOff className="w-3.5 h-3.5 text-neutral-500" />
-                  {language === 'en' ? 'Offline Cached Mode' : 'ऑफ़लाइन मोड'}
+                  Offline Cached Mode
                 </span>
                 <input
                   type="checkbox"
@@ -300,7 +298,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <label className="flex items-center justify-between p-2 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-700 cursor-pointer">
                 <span className="flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5 text-neutral-500" />
-                  {language === 'en' ? 'Partial / Stale Sensor Feed' : 'अधूरा डेटा (Stale)'}
+                  Partial / Stale Sensor Feed
                 </span>
                 <input
                   type="checkbox"
@@ -313,7 +311,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <label className="flex items-center justify-between p-2 rounded-lg bg-neutral-50 border border-neutral-200 text-xs text-neutral-700 cursor-pointer">
                 <span className="flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-neutral-500" />
-                  {language === 'en' ? 'Low Confidence Weather Model' : 'कम विश्वास संकेत'}
+                  Low Confidence Weather Model
                 </span>
                 <input
                   type="checkbox"
@@ -329,7 +327,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Footer */}
         <div className="p-4 border-t border-neutral-200 bg-neutral-50 text-[11px] text-neutral-500">
           <p className="font-medium text-neutral-700">HeatOps Field Engine v1.2</p>
-          <p>North India Climate Protection • Supabase</p>
+          <p>US Sun Belt Climate Protection • Supabase</p>
         </div>
       </aside>
     </>

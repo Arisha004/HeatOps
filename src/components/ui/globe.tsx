@@ -18,10 +18,10 @@ const GLOBE_CONFIG: any = {
   markerColor: [251 / 255, 100 / 255, 21 / 255],
   glowColor: [0.92, 0.95, 1],
   markers: [
-    { location: [28.6139, 77.209], size: 0.1 }, // Noida / Delhi
-    { location: [19.076, 72.8777], size: 0.09 }, // Mumbai
-    { location: [26.9124, 75.7873], size: 0.08 }, // Jaipur
-    { location: [26.8467, 80.9462], size: 0.08 }, // Lucknow
+    { location: [33.4484, -112.074], size: 0.1 }, // Phoenix
+    { location: [29.7604, -95.3698], size: 0.09 }, // Houston
+    { location: [36.1699, -115.1398], size: 0.08 }, // Las Vegas
+    { location: [25.7617, -80.1918], size: 0.08 }, // Miami
     { location: [14.5995, 120.9842], size: 0.03 },
     { location: [23.8103, 90.4125], size: 0.05 },
     { location: [30.0444, 31.2357], size: 0.07 },

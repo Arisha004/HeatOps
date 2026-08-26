@@ -1,18 +1,18 @@
 import { ActivityType, PredefinedSitePreset, RiskLevel } from './types';
 
-export const POPULAR_INDIAN_LOCATIONS = [
-  "Dharavi, Mumbai, Maharashtra",
-  "Bandra Kurla Complex (BKC), Mumbai, Maharashtra",
-  "Navi Mumbai Vashi, Maharashtra",
-  "Noida Sector 62, Uttar Pradesh",
-  "Gurgaon Cyber City, Haryana",
-  "Jaipur Sitapura Industrial Area, Rajasthan",
-  "Lucknow Gomti Nagar Extension, Uttar Pradesh",
-  "Kanpur Panki Industrial Estate, Uttar Pradesh",
-  "Ahmedabad GIDC Naroda, Gujarat",
-  "Chennai Sriperumbudur Industrial Corridor, Tamil Nadu",
-  "Bengaluru Peenya Industrial Area, Karnataka",
-  "Delhi Dwarka Expressway Sector 110",
+export const POPULAR_US_LOCATIONS = [
+  "Downtown Phoenix, Arizona",
+  "Sky Harbor Logistics Corridor, Phoenix, Arizona",
+  "Tucson Aerospace Industrial Park, Arizona",
+  "Las Vegas Strip Expansion Corridor, Nevada",
+  "Houston Ship Channel Industrial District, Texas",
+  "Dallas Trinity Groves Redevelopment, Texas",
+  "Austin Domain Expansion, Texas",
+  "San Antonio Port Logistics Park, Texas",
+  "Miami Brickell Waterfront District, Florida",
+  "Tampa Port Redevelopment Zone, Florida",
+  "Atlanta Beltline Corridor, Georgia",
+  "Sacramento Railyards Redevelopment, California",
 ];
 
 export const ACTIVITY_TYPES: ActivityType[] = [
@@ -26,8 +26,8 @@ export const ACTIVITY_TYPES: ActivityType[] = [
 
 export const PRESET_SITES: PredefinedSitePreset[] = [
   {
-    siteName: "Dharavi Redevelopment Sector 1",
-    location: "Dharavi, Mumbai, Maharashtra",
+    siteName: "Sky Harbor Logistics Hub — Slab 1",
+    location: "Sky Harbor Logistics Corridor, Phoenix, Arizona",
     activityType: "Concrete Pouring",
     startTime: "06:00",
     endTime: "18:00",
@@ -36,11 +36,11 @@ export const PRESET_SITES: PredefinedSitePreset[] = [
     acclimatized: true,
     shadeAvailable: false,
     waterAvailable: true,
-    description: "High density urban heat island with +4.2°C thermal delta over city average. Heavy concrete slab pour."
+    description: "Dense urban heat island with +4.5°C thermal delta over the metro average. Heavy concrete slab pour."
   },
   {
-    siteName: "BKC Commercial Tower 4",
-    location: "Bandra Kurla Complex (BKC), Mumbai, Maharashtra",
+    siteName: "Brickell Commercial Tower 4",
+    location: "Miami Brickell Waterfront District, Florida",
     activityType: "Roofing & Structural Steel",
     startTime: "07:00",
     endTime: "17:00",
@@ -52,8 +52,8 @@ export const PRESET_SITES: PredefinedSitePreset[] = [
     description: "Glass facade and structural steel reflection causing extreme midday wet-bulb radiative load."
   },
   {
-    siteName: "Noida Sec-62 Metro Extension",
-    location: "Noida Sector 62, Uttar Pradesh",
+    siteName: "Trinity Groves Transit Extension",
+    location: "Dallas Trinity Groves Redevelopment, Texas",
     activityType: "Concrete Pouring",
     startTime: "06:00",
     endTime: "18:00",
@@ -62,11 +62,11 @@ export const PRESET_SITES: PredefinedSitePreset[] = [
     acclimatized: true,
     shadeAvailable: false,
     waterAvailable: true,
-    description: "Suburban Delhi NCR infrastructure corridor with heavy concrete hydration and solar zenith flux."
+    description: "Suburban Texas infrastructure corridor with heavy concrete hydration and solar zenith flux."
   },
   {
-    siteName: "Navi Mumbai Vashi Logistics Terminal",
-    location: "Navi Mumbai Vashi, Maharashtra",
+    siteName: "Ship Channel Freight Terminal",
+    location: "Houston Ship Channel Industrial District, Texas",
     activityType: "Material Loading/Unloading",
     startTime: "06:00",
     endTime: "16:00",
@@ -75,11 +75,11 @@ export const PRESET_SITES: PredefinedSitePreset[] = [
     acclimatized: true,
     shadeAvailable: true,
     waterAvailable: true,
-    description: "Coastal humidity combined with asphalt thermal emission in semi-enclosed freight loading bay."
+    description: "Gulf Coast humidity combined with asphalt thermal emission in a semi-enclosed freight loading bay."
   },
   {
-    siteName: "Jaipur Highway Flyover Alignment",
-    location: "Jaipur Sitapura Industrial Area, Rajasthan",
+    siteName: "I-11 Highway Flyover Alignment",
+    location: "Las Vegas Strip Expansion Corridor, Nevada",
     activityType: "Asphalt Paving",
     startTime: "06:00",
     endTime: "17:00",
@@ -88,14 +88,13 @@ export const PRESET_SITES: PredefinedSitePreset[] = [
     acclimatized: true,
     shadeAvailable: false,
     waterAvailable: true,
-    description: "Extreme dry heat with +4.5°C bitumen heat emission during high-temperature asphalt compaction."
+    description: "Extreme dry heat with +4.2°C bitumen heat emission during high-temperature asphalt compaction."
   },
 ];
 
 export interface RiskColorToken {
   level: RiskLevel;
   label: string;
-  labelHi: string;
   fgHex: string;
   bgHex: string;
   borderHex: string;
@@ -111,7 +110,6 @@ export const RISK_COLOR_TOKENS: Record<RiskLevel, RiskColorToken> = {
   safe: {
     level: 'safe',
     label: 'Safe',
-    labelHi: 'सुरक्षित',
     fgHex: '#065F46',
     bgHex: '#ECFDF5',
     borderHex: '#A7F3D0',
@@ -125,7 +123,6 @@ export const RISK_COLOR_TOKENS: Record<RiskLevel, RiskColorToken> = {
   caution: {
     level: 'caution',
     label: 'Caution',
-    labelHi: 'सावधानी',
     fgHex: '#92400E',
     bgHex: '#FFFBEB',
     borderHex: '#FDE68A',
@@ -139,7 +136,6 @@ export const RISK_COLOR_TOKENS: Record<RiskLevel, RiskColorToken> = {
   high: {
     level: 'high',
     label: 'High Risk',
-    labelHi: 'उच्च जोखिम',
     fgHex: '#9A3412',
     bgHex: '#FFF7ED',
     borderHex: '#FED7AA',
@@ -153,7 +149,6 @@ export const RISK_COLOR_TOKENS: Record<RiskLevel, RiskColorToken> = {
   extreme: {
     level: 'extreme',
     label: 'Extreme',
-    labelHi: 'अत्यधिक जोखिम',
     fgHex: '#991B1B',
     bgHex: '#FEF2F2',
     borderHex: '#FECACA',
@@ -167,7 +162,6 @@ export const RISK_COLOR_TOKENS: Record<RiskLevel, RiskColorToken> = {
   unknown: {
     level: 'unknown',
     label: 'Unknown / Stale',
-    labelHi: 'अज्ञात',
     fgHex: '#374151',
     bgHex: '#F3F4F6',
     borderHex: '#E5E7EB',

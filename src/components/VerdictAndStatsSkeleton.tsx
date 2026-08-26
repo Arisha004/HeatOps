@@ -1,11 +1,9 @@
 import React from 'react';
 
 interface VerdictAndStatsSkeletonProps {
-  language?: 'en' | 'hi';
 }
 
 export const VerdictAndStatsSkeleton: React.FC<VerdictAndStatsSkeletonProps> = ({
-  language = 'en',
 }) => {
   return (
     <div id="verdict-and-stats-skeleton" className="space-y-4 animate-pulse">

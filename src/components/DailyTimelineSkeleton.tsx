@@ -1,11 +1,9 @@
 import React from 'react';
 
 interface DailyTimelineSkeletonProps {
-  language?: 'en' | 'hi';
 }
 
 export const DailyTimelineSkeleton: React.FC<DailyTimelineSkeletonProps> = ({
-  language = 'en',
 }) => {
   return (
     <div

@@ -3,10 +3,9 @@ import { ChevronDown, ChevronUp, Bot } from 'lucide-react';
 
 interface AiReasoningCardProps {
   reasoning: string[];
-  language: 'en' | 'hi';
 }
 
-export const AiReasoningCard: React.FC<AiReasoningCardProps> = ({ reasoning, language }) => {
+export const AiReasoningCard: React.FC<AiReasoningCardProps> = ({ reasoning }) => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -21,15 +20,15 @@ export const AiReasoningCard: React.FC<AiReasoningCardProps> = ({ reasoning, lan
             <Bot className="w-3.5 h-3.5" />
           </div>
           <h4 className="text-xs font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
-            <span>{language === 'en' ? 'Why this recommendation' : 'यह सिफारिश क्यों दी गई'}</span>
+            <span>Why this recommendation</span>
             <span className="text-[10px] text-neutral-500 font-medium font-mono px-1.5 py-0.2 bg-neutral-100 rounded">
-              {language === 'en' ? 'AI Reasoning' : 'एआई तर्क'}
+              AI Reasoning
             </span>
           </h4>
         </div>
 
         <div className="flex items-center gap-1 text-neutral-500 text-xs font-medium">
-          <span>{isOpen ? (language === 'en' ? 'Hide' : 'छिपाएं') : (language === 'en' ? 'Show' : 'दिखाएं')}</span>
+          <span>{isOpen ? ('Hide') : ('Show')}</span>
           {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
       </button>
@@ -45,9 +44,7 @@ export const AiReasoningCard: React.FC<AiReasoningCardProps> = ({ reasoning, lan
             ))}
           </ul>
           <p className="text-[10px] text-neutral-400 font-mono pt-1">
-            {language === 'en'
-              ? 'Calculated using WBGT thermal strain formula & real-time satellite telemetry.'
-              : 'WBGT थर्मल स्ट्रेन फॉर्मूला और रियल-टाइम सैटेलाइट डेटा से परिकलित।'}
+            Calculated using WBGT thermal strain formula & real-time satellite telemetry.
           </p>
         </div>
       )}

@@ -36,9 +36,9 @@ import { CheckCircle2, X, Trophy, Sparkles, Radio, FileDown, Send, Calculator } 
 
 // Initial pre-hydrated high-fidelity analysis for zero-delay demoing
 const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
-  id: 'site-seed-noida-sec62',
-  siteName: 'Noida Sec-62 Metro Extension',
-  location: 'Noida Sector 62, Uttar Pradesh',
+  id: 'site-seed-phoenix-skyharbor',
+  siteName: 'Sky Harbor Logistics Hub — Slab 1',
+  location: 'Sky Harbor Logistics Corridor, Phoenix, Arizona',
   activityType: 'Concrete Pouring',
   plannedHours: '06:00 – 18:00',
   thresholdTemp: 35,
@@ -73,7 +73,7 @@ const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
   peakHeatWindow: '11:00 AM – 03:30 PM',
   recommendedPauseWindow: '11:00 AM – 03:30 PM',
   hydratedBreaksFrequency: 'Every 20 mins',
-  timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+  timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
   uhiDeltaC: 4.8,
   safestWindow: '05:30 – 10:30',
   exceedanceHours: 5,
@@ -86,8 +86,7 @@ const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
   shadeAvailable: false,
   waterAvailable: true,
   toolboxBriefing: {
-    english: "Good morning team. Today at Noida Sector 62, we are executing concrete pouring for 35 workers. Because of dense asphalt and rebar heat trapping, our site runs 4.8°C hotter than the regional average, with 5 dangerous hours starting around 11:00 AM. Our safety decision is NO-GO for direct midday pours. We are strictly adhering to a 30 min Work / 30 min Rest protocol. Mandatory hydration is set to 1.0 litres per worker per hour. Take mandatory rest under UV-shaded shelters, use the buddy system to watch for dizziness, and report any heat exhaustion signs immediately. Let's work smart, stay hydrated, and stay safe.",
-    hindi: "नमस्ते साथियों। आज नोएडा सेक्टर 62 में कंक्रीट डालने का कार्य 35 श्रमिकों के साथ किया जाना है। हमारे साइट का तापमान शहर के औसत से 4.8°C अधिक रहेगा और दोपहर में 5 घंटे अत्यधिक गर्मी रहेगी। आज का सुरक्षा निर्णय दोपहर में कार्य स्थगन (NO-GO) है। सभी के लिए 30 मिनट कार्य / 30 मिनट विश्राम का नियम और प्रति घंटे 1.0 लीटर पानी पीना अनिवार्य है। चक्कर आने पर तुरंत शेड में आराम करें और सुपरवाइजर को सूचित करें। सुरक्षित रहें।",
+    english: "Good morning team. Today at the Sky Harbor Logistics Corridor, we are executing concrete pouring for 35 workers. Because of dense asphalt and rebar heat trapping, our site runs 4.8°C hotter than the regional average, with 5 dangerous hours starting around 11:00 AM. Our safety decision is NO-GO for direct midday pours. We are strictly adhering to a 30 min Work / 30 min Rest protocol. Mandatory hydration is set to 1.0 litres per worker per hour. Take mandatory rest under UV-shaded shelters, use the buddy system to watch for dizziness, and report any heat exhaustion signs immediately. Let's work smart, stay hydrated, and stay safe.",
   },
   pipelineStages: [
     {
@@ -96,7 +95,7 @@ const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
       agentRole: 'Site Parameters & Boundary Normalizer',
       status: 'completed',
       durationMs: 140,
-      details: 'Normalized Noida Sector 62 into 500m site polygon buffer vs 15km NCR baseline. Trade: Concrete Pouring, Crew: 35.',
+      details: 'Normalized Sky Harbor Logistics Corridor into 500m site polygon buffer vs 15km metro baseline. Trade: Concrete Pouring, Crew: 35.',
       outputSummary: 'Validated OperationSpec: 35 workers, 06:00–18:00 shift window.',
     },
     {
@@ -106,7 +105,7 @@ const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
       status: 'completed',
       durationMs: 380,
       details: 'Retrieved hourly air temp, relative humidity, solar zenith radiation, and wind vector grids across 13 hourly intervals.',
-      outputSummary: 'Telemetry locked: Peak ambient 43°C, NCR baseline 38.2°C (UHI delta: +4.8°C).',
+      outputSummary: 'Telemetry locked: Peak ambient 43°C, metro baseline 38.2°C (UHI delta: +4.8°C).',
     },
     {
       stageNumber: 3,
@@ -133,15 +132,15 @@ const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
       status: 'completed',
       durationMs: 110,
       details: 'Audited verdict numbers against ISO 7243:2017 standards, verifying zero mathematical drift.',
-      outputSummary: 'Compliance Passed: 100% verified against OSHA/NDMA safety criteria.',
+      outputSummary: 'Compliance Passed: 100% verified against OSHA/NIOSH safety criteria.',
     },
     {
       stageNumber: 6,
       name: 'Briefing Agent',
-      agentRole: 'Bilingual Field Toolbox Talk Generator',
+      agentRole: 'Field Toolbox Talk Generator',
       status: 'completed',
       durationMs: 190,
-      details: 'Generated 120-word spoken audio toolbox briefing in English and Hindi for crew supervisors.',
+      details: 'Generated 120-word spoken audio toolbox briefing for crew supervisors.',
       outputSummary: 'Toolbox Briefing Ready: Audio synthesis stream operational.',
     },
   ],
@@ -149,7 +148,6 @@ const INITIAL_SEEDED_ANALYSIS: RiskAnalysisResult = {
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AppView>('landing');
-  const [language, setLanguage] = useState<'en' | 'hi'>('en');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState<boolean>(false);
@@ -222,7 +220,7 @@ export default function App() {
             currentTemp: newTemp,
             currentHeatIndex: newHeatIndex,
             currentWindSpeed: newWind,
-            timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
           };
         })
       );
@@ -304,7 +302,7 @@ export default function App() {
         peakHeatWindow: '12:00 PM – 3:00 PM',
         recommendedPauseWindow: '11:00 AM – 3:00 PM',
         hydratedBreaksFrequency: 'Every 30 mins',
-        timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
       };
 
       setSavedAnalyses((prev) => [fallbackResult, ...prev]);
@@ -348,7 +346,6 @@ export default function App() {
       userName: authUser?.fullName || 'HSE Lead Officer',
       userRole: authUser?.role === 'hse_lead' ? 'Chief HSE Officer' : 'Site Safety Supervisor',
       organization: authUser?.organization || 'L&T Infrastructure HSE Div',
-      language,
     });
     showToast('Downloaded ISO 7243 Compliance Audit Report (PDF)');
   };
@@ -382,8 +379,6 @@ export default function App() {
 
         {/* Top Navigation Header */}
         <Header
-          language={language}
-          onToggleLanguage={() => setLanguage((l) => (l === 'en' ? 'hi' : 'en'))}
           isOffline={isOffline}
           onToggleOffline={() => setIsOffline(!isOffline)}
           onNewSiteClick={() => setCurrentView('setup')}
@@ -414,7 +409,6 @@ export default function App() {
           onNewSite={() => setCurrentView('setup')}
           currentView={currentView}
           onNavigateView={(view) => setCurrentView(view)}
-          language={language}
           isOffline={isOffline}
           onToggleOffline={() => setIsOffline(!isOffline)}
           isPartialData={isPartialData}
@@ -438,7 +432,6 @@ export default function App() {
             <LoadingScreen
               location={loadingContext.location}
               activityType={loadingContext.activityType}
-              language={language}
             />
           ) : currentView === 'landing' ? (
             <LandingPage
@@ -452,19 +445,17 @@ export default function App() {
               onSelectPresetDemo={(preset) => {
                 handleSelectPreset(preset || PRESET_SITES[0]);
               }}
-              language={language}
               onOpenAuth={() => setIsAuthModalOpen(true)}
             />
           ) : currentView === 'empty' ? (
             <EmptyState
               onSetupNewSite={() => setCurrentView('setup')}
               onSelectPreset={handleSelectPreset}
-              language={language}
             />
           ) : currentView === 'setup' ? (
-            <SetupScreen onSubmit={handleAnalyzeSite} language={language} />
+            <SetupScreen onSubmit={handleAnalyzeSite} />
           ) : currentView === 'tokens' ? (
-            <DesignTokensView language={language} />
+            <DesignTokensView />
           ) : currentView === 'dashboard' && activeAnalysis ? (
             <div className="space-y-5 animate-fadeIn">
               {/* Edge case state banners */}
@@ -474,18 +465,16 @@ export default function App() {
                 isPartialData={isPartialData}
                 isLowConfidence={isLowConfidence}
                 hasSensorSpike={activeAnalysis.decisionStatus === 'NO-GO'}
-                language={language}
               />
 
               {/* Core Screen 1: Prominent GO / ADJUST / NO-GO Decision Card & Verdict Banner */}
               <VerdictAndStats
                 analysis={activeAnalysis}
-                language={language}
                 onOpenNotifyModal={() => setIsNotifyModalOpen(true)}
                 user={authUser}
               />
 
-              {/* Core Screen 2: 120-Word Bilingual Supervisor Spoken Toolbox Talk */}
+              {/* Core Screen 2: 120-Word Supervisor Spoken Toolbox Talk */}
               {activeAnalysis.toolboxBriefing && (
                 <ToolboxBriefingCard
                   briefing={activeAnalysis.toolboxBriefing}
@@ -498,7 +487,6 @@ export default function App() {
                   safestWindow={activeAnalysis.safestWindow || '05:30 – 11:00'}
                   decisionStatus={activeAnalysis.decisionStatus}
                   uhiDeltaC={activeAnalysis.uhiDeltaC || 4.2}
-                  language={language}
                 />
               )}
 
@@ -506,7 +494,6 @@ export default function App() {
               {activeAnalysis.pipelineStages && activeAnalysis.pipelineStages.length > 0 && (
                 <PipelineInspectionCard
                   stages={activeAnalysis.pipelineStages}
-                  language={language}
                 />
               )}
 
@@ -515,12 +502,11 @@ export default function App() {
                 hourlyRisks={activeAnalysis.hourlyRisks}
                 selectedHour={selectedHour}
                 onSelectHour={(hour) => setSelectedHour(hour)}
-                language={language}
                 isPartialData={isPartialData}
               />
 
               {/* Core Screen 5: Transparent AI Reasoning Card */}
-              <AiReasoningCard reasoning={activeAnalysis.aiReasoning} language={language} />
+              <AiReasoningCard reasoning={activeAnalysis.aiReasoning} />
 
               {/* Quick Action Footer Controls */}
               <div className="pt-2 flex items-center justify-between text-xs text-neutral-500 border-t border-neutral-200">
@@ -529,7 +515,7 @@ export default function App() {
                   onClick={() => setCurrentView('setup')}
                   className="font-semibold text-neutral-800 hover:underline cursor-pointer"
                 >
-                  ← {language === 'en' ? 'Modify Site Setup' : 'साइट सेटिंग्स बदलें'}
+                  ← Modify Site Setup
                 </button>
 
                 <div className="flex items-center gap-3">
@@ -538,7 +524,7 @@ export default function App() {
                     className="font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
                   >
                     <Calculator className="w-3.5 h-3.5" />
-                    <span>{language === 'en' ? 'ISO 7243 Math Lab' : 'थर्मल मैथ लैब'}</span>
+                    <span>ISO 7243 Math Lab</span>
                   </button>
 
                   <button
@@ -555,7 +541,6 @@ export default function App() {
             <EmptyState
               onSetupNewSite={() => setCurrentView('setup')}
               onSelectPreset={handleSelectPreset}
-              language={language}
             />
           )}
         </main>
@@ -577,7 +562,6 @@ export default function App() {
 
       {/* Global Application Footer */}
       <Footer
-        language={language}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         user={authUser}
         onNavigate={(tab) => {
@@ -596,7 +580,6 @@ export default function App() {
       <HourDetailSheet
         hourData={selectedHour}
         onClose={() => setSelectedHour(null)}
-        language={language}
       />
 
       {/* Crew SMS Broadcast Modal */}
@@ -605,7 +588,6 @@ export default function App() {
           isOpen={isNotifyModalOpen}
           onClose={() => setIsNotifyModalOpen(false)}
           analysis={activeAnalysis}
-          language={language}
           onNotificationSent={(msg) => showToast(msg)}
         />
       )}
@@ -614,7 +596,6 @@ export default function App() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        language={language}
         onAuthSuccess={(profile) => {
           setAuthUser(profile);
           showToast(`Welcome back, ${profile.fullName}! Authenticated via Supabase.`);
@@ -625,14 +606,12 @@ export default function App() {
       <FortyGuardDocsModal
         isOpen={isDocsModalOpen}
         onClose={() => setIsDocsModalOpen(false)}
-        language={language}
       />
 
       {/* Hackathon Judge Evaluation & Quick-Start Modal */}
       <JudgeTourModal
         isOpen={isJudgeModalOpen}
         onClose={() => setIsJudgeModalOpen(false)}
-        language={language}
         onSelectPreset={(preset) => {
           handleSelectPreset(preset);
           showToast(`Loaded ${preset.siteName} live microclimate scenario!`);
@@ -656,7 +635,6 @@ export default function App() {
       <IsoMathModal
         isOpen={isIsoMathModalOpen}
         onClose={() => setIsIsoMathModalOpen(false)}
-        language={language}
       />
     </div>
   );

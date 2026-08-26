@@ -21,13 +21,11 @@ import {
 interface FortyGuardDocsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  language: 'en' | 'hi';
 }
 
 export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
   isOpen,
   onClose,
-  language,
 }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'api-spec' | 'architecture' | 'impact'>('overview');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -194,7 +192,7 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
                   The One-Line Pitch
                 </span>
                 <p className="font-semibold text-orange-950 text-sm sm:text-base italic">
-                  "Your site runs 4.2 °C hotter than the Mumbai average, and stays above the safe threshold for 6 straight hours. Move the pour to 05:30–11:00 and you keep all 30 workers."
+                  "Your site runs 4.5 °C hotter than the Phoenix average, and stays above the safe threshold for 6 straight hours. Move the pour to 05:30–11:00 and you keep all 30 workers."
                 </p>
               </div>
 
@@ -216,7 +214,7 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
                     <span>The HeatOps Solution</span>
                   </div>
                   <p className="text-neutral-600 text-xs">
-                    HeatOps links FortyGuard's 500m microclimate heat intelligence grids directly to a deterministic ISO 7243 / Australian BoM WBGT thermal risk core and Gemini 2.5/3.7 Flash reasoning. Forepersons receive real-time <strong>Go / Adjust / No-Go</strong> verdicts, tailored work-rest regimens, hydration quotas, and a 120-word spoken toolbox briefing in English and Hindi.
+                    HeatOps links FortyGuard's 500m microclimate heat intelligence grids directly to a deterministic ISO 7243 / Australian BoM WBGT thermal risk core and Gemini 2.5/3.7 Flash reasoning. Forepersons receive real-time <strong>Go / Adjust / No-Go</strong> verdicts, tailored work-rest regimens, hydration quotas, and a 120-word spoken toolbox briefing in English.
                   </p>
                 </div>
               </div>
@@ -242,7 +240,7 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
                   <div className="p-3 rounded-lg border border-neutral-200 bg-white">
                     <span className="font-bold text-neutral-900 block mb-1">Synthetic Voice Toolbox Briefing</span>
                     <p className="text-neutral-500 text-[11px]">
-                      Generates 120-word spoken toolbox talks in English & Devanagari Hindi with 1-click Web Speech voice broadcast for site crews.
+                      Generates 120-word spoken toolbox talks in English with 1-click Web Speech voice broadcast for site crews.
                     </p>
                   </div>
                 </div>
@@ -399,7 +397,7 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
                   <div>
                     <h5 className="font-bold text-neutral-900 text-xs">Stage 5: Verification Agent (Regulatory Safety Audit)</h5>
                     <p className="text-neutral-600 text-[11px] mt-0.5">
-                      Audits plan recommendations against ISO 7243:2017 and OSHA/NDMA criteria to guarantee zero mathematical drift before supervisor delivery.
+                      Audits plan recommendations against ISO 7243:2017 and OSHA/NIOSH criteria to guarantee zero mathematical drift before supervisor delivery.
                     </p>
                   </div>
                 </div>
@@ -407,9 +405,9 @@ export const FortyGuardDocsModal: React.FC<FortyGuardDocsModalProps> = ({
                 <div className="p-3.5 rounded-xl border border-neutral-200 bg-neutral-50 flex items-start gap-3">
                   <span className="font-mono font-bold px-2 py-1 rounded bg-purple-600 text-white text-xs shrink-0">STG 06</span>
                   <div>
-                    <h5 className="font-bold text-neutral-900 text-xs">Stage 6: Briefing Agent (Bilingual Audio Synthesizer)</h5>
+                    <h5 className="font-bold text-neutral-900 text-xs">Stage 6: Briefing Agent (Audio Synthesizer)</h5>
                     <p className="text-neutral-600 text-[11px] mt-0.5">
-                      Generates a concise 120-word spoken toolbox talk in English and Hindi for morning site supervisor rollout with 1-click synthetic speech broadcast.
+                      Generates a concise 120-word spoken toolbox talk in English for morning site supervisor rollout with 1-click synthetic speech broadcast.
                     </p>
                   </div>
                 </div>

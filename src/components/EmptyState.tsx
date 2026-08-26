@@ -6,10 +6,9 @@ import { PredefinedSitePreset } from '../types';
 interface EmptyStateProps {
   onSetupNewSite: () => void;
   onSelectPreset: (preset: PredefinedSitePreset) => void;
-  language: 'en' | 'hi';
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ onSetupNewSite, onSelectPreset, language }) => {
+export const EmptyState: React.FC<EmptyStateProps> = ({ onSetupNewSite, onSelectPreset }) => {
   return (
     <div id="empty-state-card" className="max-w-md mx-auto my-8 p-6 sm:p-8 bg-white rounded-2xl border border-neutral-200 shadow-xs text-center space-y-6">
       {/* Calm Zen Icon Header */}
@@ -19,12 +18,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSetupNewSite, onSelect
 
       <div className="space-y-2">
         <h2 className="text-xl font-bold text-neutral-900 tracking-tight">
-          {language === 'en' ? 'No Active Site Evaluated' : 'कोई सक्रिय साइट नहीं है'}
+          No Active Site Evaluated
         </h2>
         <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed max-w-sm mx-auto">
-          {language === 'en'
-            ? 'HeatOps answers one question in under 3 seconds: Is it safe for outdoor labor to work right now, and when should work pause?'
-            : 'हीट-ऑप्स 3 सेकंड में उत्तर देता है: क्या अभी काम करना सुरक्षित है और कब रुकना चाहिए?'}
+          HeatOps answers one question in under 3 seconds: Is it safe for outdoor labor to work right now, and when should work pause?
         </p>
       </div>
 
@@ -35,13 +32,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onSetupNewSite, onSelect
         className="w-full py-3.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-xs min-h-[48px] cursor-pointer"
       >
         <Plus className="w-4 h-4" />
-        <span>{language === 'en' ? 'Setup First Site Run' : 'पहला साइट रन शुरू करें'}</span>
+        <span>Setup First Site Run</span>
       </button>
 
       {/* Quick 1-Tap Presets */}
       <div className="pt-4 border-t border-neutral-100 space-y-2 text-left">
         <p className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
-          {language === 'en' ? 'Or load 1-tap template' : 'या टेम्पलेट चुनें'}
+          Or load 1-tap template
         </p>
         <div className="space-y-1.5">
           {PRESET_SITES.slice(0, 3).map((preset, idx) => (

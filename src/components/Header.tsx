@@ -1,11 +1,9 @@
 import React from 'react';
-import { Wifi, WifiOff, Globe, Menu, Plus, Bell, User, LogIn, ShieldCheck, Trophy, Sparkles, Terminal } from 'lucide-react';
+import { Wifi, WifiOff, Menu, Plus, Bell, User, LogIn, ShieldCheck, Trophy, Sparkles, Terminal } from 'lucide-react';
 import { Logo } from './Logo';
 import { AuthProfile } from '../lib/supabase';
 
 interface HeaderProps {
-  language: 'en' | 'hi';
-  onToggleLanguage: () => void;
   isOffline: boolean;
   onToggleOffline: () => void;
   onNewSiteClick: () => void;
@@ -21,8 +19,6 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  language,
-  onToggleLanguage,
   isOffline,
   onToggleOffline,
   onNewSiteClick,
@@ -71,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-neutral-500 leading-tight hidden sm:block font-medium">
-              {language === 'en' ? 'ISO 7243 Heat Safety Intelligence' : 'श्रम गर्मी-जोखिम सुरक्षा प्रणाली'}
+              ISO 7243 Heat Safety Intelligence
             </p>
           </div>
         </button>
@@ -127,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <>
                 <LogIn className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="hidden sm:inline">{language === 'en' ? 'Login' : 'लॉगिन'}</span>
+                <span className="hidden sm:inline">Login</span>
               </>
             )}
           </button>
@@ -172,17 +168,6 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </button>
 
-        {/* Hindi/English Language Toggle */}
-        <button
-          id="btn-toggle-language"
-          onClick={onToggleLanguage}
-          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-800 transition-all min-h-[38px] cursor-pointer"
-          title="Toggle Language / भाषा बदलें"
-        >
-          <Globe className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
-          <span className="text-xs">{language === 'en' ? 'हिन्दी' : 'EN'}</span>
-        </button>
-
         {/* New site CTA */}
         <button
           id="btn-header-new-site"
@@ -190,7 +175,7 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-bold bg-neutral-900 text-white hover:bg-neutral-800 transition-all min-h-[38px] shadow-2xs cursor-pointer shrink-0"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span className="hidden xs:inline">{language === 'en' ? 'New Site' : 'नया साइट'}</span>
+          <span className="hidden xs:inline">New Site</span>
         </button>
       </div>
     </header>

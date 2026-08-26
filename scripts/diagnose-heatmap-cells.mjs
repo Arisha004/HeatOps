@@ -13,7 +13,7 @@ if (!KEY) {
 }
 
 const BASE = 'https://api.fortyguard.com';
-const NOIDA = { lat: 28.6274, lon: 77.3716 }; // Sector 62, Noida
+const PHOENIX = { lat: 33.4484, lon: -112.0740 }; // Downtown Phoenix, Arizona
 
 function ring(lat, lon, meters) {
   const dLat = meters / 111320;
@@ -57,7 +57,7 @@ async function run(label, meters, daysAgo) {
   const dateStr = d.toISOString().slice(0, 10);
   const hour = new Date().getUTCHours();
   const payload = {
-    polygon_aoi: ring(NOIDA.lat, NOIDA.lon, meters),
+    polygon_aoi: ring(PHOENIX.lat, PHOENIX.lon, meters),
     date_time: { start_date: dateStr, filter_type: 1, start_time: `${String(hour).padStart(2, '0')}:00` },
     granularity: 100,
     analytic_type: 'tcm',

@@ -50,7 +50,6 @@ export interface PipelineStageLog {
 
 export interface ToolboxBriefing {
   english: string;
-  hindi: string;
   wordCount?: number;
 }
 

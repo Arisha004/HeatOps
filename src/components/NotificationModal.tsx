@@ -19,7 +19,6 @@ interface NotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   analysis: RiskAnalysisResult;
-  language: 'en' | 'hi';
   onNotificationSent: (summary: string) => void;
 }
 
@@ -32,10 +31,10 @@ export interface CrewContact {
 }
 
 const DEFAULT_CREW_CONTACTS: CrewContact[] = [
-  { id: '1', name: 'Ramesh Kumar', role: 'Site Supervisor', phone: '+919876543210', selected: true },
-  { id: '2', name: 'Sunil Verma', role: 'Concrete Pouring Lead', phone: '+919812345678', selected: true },
-  { id: '3', name: 'Vikram Singh', role: 'Scaffolding & Safety Incharge', phone: '+919765432109', selected: true },
-  { id: '4', name: 'Anil Yadav', role: 'Equipment Operator', phone: '+919988776655', selected: false },
+  { id: '1', name: 'Marcus Bell', role: 'Site Supervisor', phone: '+16025550142', selected: true },
+  { id: '2', name: 'Devon Ortiz', role: 'Concrete Pouring Lead', phone: '+16025550178', selected: true },
+  { id: '3', name: 'Riley Chen', role: 'Scaffolding & Safety Lead', phone: '+16025550109', selected: true },
+  { id: '4', name: 'Sam Okafor', role: 'Equipment Operator', phone: '+16025550165', selected: false },
   { id: '5', name: 'Mohd. Imran', role: 'Labor Transport Lead', phone: '+919844433221', selected: false },
 ];
 
@@ -43,13 +42,11 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
   isOpen,
   onClose,
   analysis,
-  language,
   onNotificationSent,
 }) => {
   if (!isOpen) return null;
 
   const [contacts, setContacts] = useState<CrewContact[]>(DEFAULT_CREW_CONTACTS);
-  const [msgLang, setMsgLang] = useState<'hi' | 'en'>(language === 'hi' ? 'hi' : 'en');
   const [customNote, setCustomNote] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
   const [sentSuccess, setSentSuccess] = useState<boolean>(false);
@@ -73,14 +70,7 @@ PAUSE WINDOW: ${analysis.recommendedPauseWindow}
 HYDRATION BREAK: ${analysis.hydratedBreaksFrequency}
 ${customNote ? `DIRECTIVE: ${customNote}` : ''}`;
 
-  const defaultTextHi = `[HeatOps अलर्ट] ${analysis.siteName}
-स्थिति: ${analysis.decisionStatus} (${analysis.currentHeatIndex}°C महसूस ताप)
-निर्देश: ${analysis.overallVerdict}
-काम रोकने का समय: ${analysis.recommendedPauseWindow}
-पानी पीने का ब्रेक: ${analysis.hydratedBreaksFrequency}
-${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
-
-  const currentMessage = msgLang === 'hi' ? defaultTextHi : defaultTextEn;
+  const currentMessage = defaultTextEn;
 
   const toggleContact = (id: string) => {
     setContacts((prev) =>
@@ -139,10 +129,7 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
       setIsSending(false);
       setSentSuccess(true);
       onNotificationSent(
-        language === 'en'
-          ? `Heat alert dispatched to ${selectedCount} contacts! Receipt: ${data.receiptId}`
-          : `${selectedCount} क्रू संपर्कों को हीट अलर्ट भेजा गया!`
-      );
+        `Heat alert dispatched to ${selectedCount} contacts! Receipt: ${data.receiptId}`);
     } catch (err) {
       console.warn('Alert API warning:', err);
       setReceiptToken(`HTOPS-DELIVERED-${Date.now().toString().slice(-6)}`);
@@ -195,10 +182,10 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
             </div>
             <div>
               <h3 className="text-base font-bold text-neutral-900 leading-tight">
-                {language === 'en' ? 'Dispatch Crew Heat Alert' : 'क्रू को गर्मी अलर्ट भेजें'}
+                Dispatch Crew Heat Alert
               </h3>
               <p className="text-xs text-neutral-500">
-                {language === 'en' ? 'Live WhatsApp, SMS & Broadcast Gateway' : 'लाइव व्हाट्सएप और एसएमएस गेटवे'}
+                Live WhatsApp, SMS & Broadcast Gateway
               </p>
             </div>
           </div>
@@ -220,16 +207,14 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
             </div>
             <div className="space-y-1">
               <h4 className="text-base font-bold text-neutral-900">
-                {language === 'en' ? 'Alert Dispatched Successfully!' : 'अलर्ट सफलतापूर्वक भेजा गया!'}
+                Alert Dispatched Successfully!
               </h4>
               <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-700 font-mono font-semibold">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Audit Receipt: {receiptToken}</span>
               </div>
               <p className="text-xs text-neutral-600 max-w-sm mx-auto leading-relaxed pt-1">
-                {language === 'en'
-                  ? `Delivered to ${selectedCount} contacts for site "${analysis.siteName}". Gateway receipts recorded.`
-                  : `साइट "${analysis.siteName}" के ${selectedCount} संपर्कों को अलर्ट भेजा गया।`}
+                {`Delivered to ${selectedCount} contacts for site "${analysis.siteName}". Gateway receipts recorded.`}
               </p>
             </div>
 
@@ -241,7 +226,7 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
               onClick={onClose}
               className="w-full py-3 rounded-xl bg-neutral-900 text-white font-bold text-xs hover:bg-neutral-800 transition-colors cursor-pointer"
             >
-              {language === 'en' ? 'Back to Dashboard' : 'डैशबोर्ड पर वापस जाएं'}
+              Back to Dashboard
             </button>
           </div>
         ) : (
@@ -271,7 +256,7 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-neutral-800 flex items-center gap-1.5">
                   <Users className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>{language === 'en' ? 'Crew Contacts' : 'क्रू संपर्क'}</span>
+                  <span>Crew Contacts</span>
                   <span className="font-mono text-neutral-500">({selectedCount}/{contacts.length})</span>
                 </span>
                 <div className="flex items-center gap-2">
@@ -281,7 +266,7 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
                     className="text-[11px] font-bold text-orange-600 hover:text-orange-700 flex items-center gap-0.5 cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
-                    <span>{language === 'en' ? 'Add Number' : 'नंबर जोड़ें'}</span>
+                    <span>Add Number</span>
                   </button>
                   <span className="text-neutral-300">•</span>
                   <button
@@ -290,8 +275,8 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
                     className="text-[11px] font-semibold text-neutral-600 hover:text-neutral-900 underline cursor-pointer"
                   >
                     {contacts.every((c) => c.selected)
-                      ? (language === 'en' ? 'Deselect All' : 'सभी हटाएं')
-                      : (language === 'en' ? 'Select All' : 'सभी चुनें')}
+                      ? ('Deselect All')
+                      : ('Select All')}
                   </button>
                 </div>
               </div>
@@ -300,7 +285,7 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
               {showAddRecipient && (
                 <form onSubmit={handleAddCustomContact} className="p-3 bg-orange-50/70 border border-orange-200 rounded-xl space-y-2 animate-fadeIn">
                   <span className="text-[11px] font-bold text-orange-950 block">
-                    {language === 'en' ? 'Add Your Own Phone Number to Test' : 'टेस्ट के लिए अपना नंबर जोड़ें'}
+                    Add Your Own Phone Number to Test
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     <input
@@ -375,32 +360,12 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
               </div>
             </div>
 
-            {/* Message Language & Preview */}
+            {/* Message Preview */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="font-semibold text-neutral-800">
-                  {language === 'en' ? 'Alert Message Body' : 'संदेश सामग्री'}
+                  Alert Message Body
                 </label>
-                <div className="flex items-center gap-1.5 bg-neutral-100 p-0.5 rounded-lg">
-                  <button
-                    type="button"
-                    onClick={() => setMsgLang('hi')}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer ${
-                      msgLang === 'hi' ? 'bg-white text-neutral-900 shadow-2xs' : 'text-neutral-500'
-                    }`}
-                  >
-                    हिन्दी
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMsgLang('en')}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer ${
-                      msgLang === 'en' ? 'bg-white text-neutral-900 shadow-2xs' : 'text-neutral-500'
-                    }`}
-                  >
-                    English
-                  </button>
-                </div>
               </div>
 
               {/* Editable Custom Note Field */}
@@ -408,7 +373,7 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
                 type="text"
                 value={customNote}
                 onChange={(e) => setCustomNote(e.target.value)}
-                placeholder={language === 'en' ? 'Add field note (e.g. Assemble under shade awning)' : 'अतिरिक्त फील्ड नोट जोड़ें'}
+                placeholder={'Add field note (e.g. Assemble under shade awning)'}
                 className="w-full px-3 py-1.5 rounded-xl border border-neutral-200 text-xs bg-neutral-50 focus:bg-white focus:border-neutral-900 focus:outline-none"
               />
 
@@ -478,15 +443,13 @@ ${customNote ? `विशेष निर्देश: ${customNote}` : ''}`;
               {isSending ? (
                 <>
                   <span className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                  <span>{language === 'en' ? 'Dispatching Telecom Gateway SMS...' : 'भेजा जा रहा है...'}</span>
+                  <span>Dispatching Telecom Gateway SMS...</span>
                 </>
               ) : (
                 <>
                   <Send className="w-3.5 h-3.5 text-amber-400" />
                   <span>
-                    {language === 'en'
-                      ? `Dispatch Gateway Broadcast to ${selectedCount} Contacts`
-                      : `${selectedCount} लोगों को प्रसारण भेजें`}
+                    {`Dispatch Gateway Broadcast to ${selectedCount} Contacts`}
                   </span>
                 </>
               )}

@@ -24,14 +24,12 @@ import {
 
 interface VerdictAndStatsProps {
   analysis: RiskAnalysisResult;
-  language: 'en' | 'hi';
   onOpenNotifyModal?: () => void;
   user?: AuthProfile | null;
 }
 
 export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
   analysis,
-  language,
   onOpenNotifyModal,
   user,
 }) => {
@@ -101,7 +99,6 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
           userName: user?.fullName,
           userRole: user?.role === 'hse_lead' ? 'Chief HSE Lead' : user?.role === 'contractor_lead' ? 'Contractor Lead' : 'Site Supervisor',
           organization: user?.organization,
-          language,
         });
         setIsGeneratingPdf(false);
         setDownloadSuccess(true);
@@ -220,7 +217,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
-              {language === 'en' ? 'Today’s Safety Verdict' : 'आज का सुरक्षा फैसला'}
+              Today’s Safety Verdict
             </span>
             <span className="text-neutral-300">•</span>
             <span className="text-xs font-mono text-neutral-500">{analysis.timestamp}</span>
@@ -244,10 +241,10 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
               )}
               <span>
                 {isExportingCsv
-                  ? (language === 'en' ? 'Exporting CSV...' : 'सीएसवी तैयार...')
+                  ? ('Exporting CSV...')
                   : csvSuccess
-                  ? (language === 'en' ? 'CSV Saved' : 'सीएसवी सहेजा गया')
-                  : (language === 'en' ? 'Export CSV' : 'सीएसवी डाउनलोड')}
+                  ? ('CSV Saved')
+                  : ('Export CSV')}
               </span>
             </button>
 
@@ -267,10 +264,10 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
               )}
               <span>
                 {isGeneratingPdf
-                  ? (language === 'en' ? 'Generating PDF...' : 'रिपोर्ट तैयार हो रही है...')
+                  ? ('Generating PDF...')
                   : downloadSuccess
-                  ? (language === 'en' ? 'Report Downloaded' : 'डाउनलोड सम्पन्न')
-                  : (language === 'en' ? 'Export PDF' : 'पीडीएफ डाउनलोड')}
+                  ? ('Report Downloaded')
+                  : ('Export PDF')}
               </span>
             </button>
 
@@ -286,7 +283,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
                   title="Download the completed FortyGuard Heat Intelligence report"
                 >
                   <Download className="w-3.5 h-3.5 text-sky-700" />
-                  <span>{language === 'en' ? 'Download Heat Report' : 'हीट रिपोर्ट डाउनलोड'}</span>
+                  <span>Download Heat Report</span>
                 </a>
               ) : (
                 <button
@@ -309,12 +306,12 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
                   )}
                   <span>
                     {fgState === 'submitting'
-                      ? (language === 'en' ? 'Requesting...' : 'अनुरोध भेजा जा रहा...')
+                      ? ('Requesting...')
                       : fgState === 'processing'
-                      ? (language === 'en' ? 'Building Report...' : 'रिपोर्ट बन रही है...')
+                      ? ('Building Report...')
                       : fgState === 'error'
-                      ? (language === 'en' ? 'Retry Heat Report' : 'पुनः प्रयास करें')
-                      : (language === 'en' ? 'Heat Intelligence Report' : 'हीट इंटेलिजेंस रिपोर्ट')}
+                      ? ('Retry Heat Report')
+                      : ('Heat Intelligence Report')}
                   </span>
                 </button>
               )
@@ -376,7 +373,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
 
           <div className="text-left sm:text-right">
             <span className="text-[11px] text-neutral-500 font-semibold uppercase block">
-              {language === 'en' ? 'Recommended Work Pause' : 'अनुशंसित कार्य विराम'}
+              Recommended Work Pause
             </span>
             <span id="recommended-pause-window" className="text-sm font-bold text-neutral-900 font-mono">
               {analysis.recommendedPauseWindow}
@@ -388,10 +385,10 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         <div className="p-3.5 rounded-xl bg-orange-50/80 border border-orange-200 text-orange-950 text-xs sm:text-sm font-medium leading-snug">
           <span className="font-bold text-orange-900 block mb-0.5">
             {analysis.dataSource === 'fortyguard-live'
-              ? (language === 'en' ? 'Hyperlocal FortyGuard Risk Recommendation:' : 'हाइपरलोकल तापमान जोखिम सिफारिश:')
+              ? ('Hyperlocal FortyGuard Risk Recommendation:')
               : analysis.dataSource === 'open-meteo'
-              ? (language === 'en' ? 'Risk Recommendation (Open-Meteo live telemetry):' : 'जोखिम सिफारिश (Open-Meteo लाइव डेटा):')
-              : (language === 'en' ? 'Risk Recommendation (offline fixture data):' : 'जोखिम सिफारिश (ऑफ़लाइन डेटा):')}
+              ? ('Risk Recommendation (Open-Meteo live telemetry):')
+              : ('Risk Recommendation (offline fixture data):')}
           </span>
           {analysis.dataSource === 'open-meteo' && analysis.fortyGuardNote && (
             <span className="block text-[11px] sm:text-xs text-orange-800/80 font-normal mb-1.5">
@@ -448,10 +445,10 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
             {confirmedPause ? (
               <>
                 <Check className="w-4 h-4 text-emerald-300" />
-                <span>{language === 'en' ? 'Pause Logged' : 'विराम दर्ज हुआ'}</span>
+                <span>Pause Logged</span>
               </>
             ) : (
-              <span>{language === 'en' ? 'Confirm Work Pause' : 'कार्य विराम की पुष्टि करें'}</span>
+              <span>Confirm Work Pause</span>
             )}
           </button>
 
@@ -468,8 +465,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
             <Send className="w-3.5 h-3.5 text-neutral-600" />
             <span>
               {notified
-                ? language === 'en' ? 'Alert Sent via SMS!' : 'अलर्ट भेजा गया!'
-                : language === 'en' ? 'Notify Crew via SMS' : 'क्रू को एसएमएस भेजें'}
+                ? 'Alert Sent via SMS!': 'Notify Crew via SMS'}
             </span>
           </button>
 
@@ -494,10 +490,10 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
             )}
             <span>
               {isExportingCsv
-                ? (language === 'en' ? 'Exporting CSV...' : 'सीएसवी तैयार...')
+                ? ('Exporting CSV...')
                 : csvSuccess
-                ? (language === 'en' ? 'CSV Downloaded!' : 'सीएसवी डाउनलोड!')
-                : (language === 'en' ? 'Export CSV (Excel)' : 'सीएसवी डेटा (Excel)')}
+                ? ('CSV Downloaded!')
+                : ('Export CSV (Excel)')}
             </span>
           </button>
 
@@ -521,10 +517,10 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
             )}
             <span>
               {isGeneratingPdf
-                ? (language === 'en' ? 'Generating PDF...' : 'पीडीएफ बन रहा है...')
+                ? ('Generating PDF...')
                 : downloadSuccess
-                ? (language === 'en' ? 'Report Downloaded!' : 'रिपोर्ट डाउनलोड हो गई!')
-                : (language === 'en' ? 'Download Report (PDF)' : 'रिपोर्ट डाउनलोड (PDF)')}
+                ? ('Report Downloaded!')
+                : ('Download Report (PDF)')}
             </span>
           </button>
         </div>
@@ -535,7 +531,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         <div className="bg-white p-3 rounded-xl border border-neutral-200 space-y-0.5">
           <div className="flex items-center gap-1.5 text-neutral-500 text-[11px] font-semibold">
             <Thermometer className="w-3.5 h-3.5 text-neutral-600" />
-            <span>{language === 'en' ? 'Current Temp' : 'वर्तमान तापमान'}</span>
+            <span>Current Temp</span>
           </div>
           <p className="text-lg font-bold font-mono text-neutral-900">{analysis.currentTemp}°C</p>
         </div>
@@ -543,7 +539,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         <div className="bg-white p-3 rounded-xl border border-neutral-200 space-y-0.5">
           <div className="flex items-center gap-1.5 text-neutral-500 text-[11px] font-semibold">
             <Flame className="w-3.5 h-3.5 text-amber-600" />
-            <span>{language === 'en' ? 'Feels Like' : 'महसूस ताप'}</span>
+            <span>Feels Like</span>
           </div>
           <p className="text-lg font-bold font-mono text-amber-900">{analysis.currentHeatIndex}°C</p>
         </div>
@@ -551,7 +547,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         <div className="bg-white p-3 rounded-xl border border-neutral-200 space-y-0.5">
           <div className="flex items-center gap-1.5 text-neutral-500 text-[11px] font-semibold">
             <Droplets className="w-3.5 h-3.5 text-blue-600" />
-            <span>{language === 'en' ? 'Humidity' : 'नमी'}</span>
+            <span>Humidity</span>
           </div>
           <p className="text-lg font-bold font-mono text-neutral-900">{analysis.currentHumidity}%</p>
         </div>
@@ -559,7 +555,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         <div className="bg-white p-3 rounded-xl border border-neutral-200 space-y-0.5">
           <div className="flex items-center gap-1.5 text-neutral-500 text-[11px] font-semibold">
             <Sun className="w-3.5 h-3.5 text-amber-500" />
-            <span>{language === 'en' ? 'UV Index' : 'यूवी इंडेक्स'}</span>
+            <span>UV Index</span>
           </div>
           <p className="text-lg font-bold font-mono text-neutral-900">{analysis.currentUvIndex} / 12</p>
         </div>
@@ -567,7 +563,7 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
         <div className="bg-white p-3 rounded-xl border border-neutral-200 space-y-0.5 col-span-2 sm:col-span-1">
           <div className="flex items-center gap-1.5 text-neutral-500 text-[11px] font-semibold">
             <Wind className="w-3.5 h-3.5 text-neutral-600" />
-            <span>{language === 'en' ? 'Wind Speed' : 'हवा की गति'}</span>
+            <span>Wind Speed</span>
           </div>
           <p className="text-lg font-bold font-mono text-neutral-900">{analysis.currentWindSpeed} km/h</p>
         </div>

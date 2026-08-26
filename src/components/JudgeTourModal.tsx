@@ -24,7 +24,6 @@ import { PRESET_SITES } from '../constants';
 interface JudgeTourModalProps {
   isOpen: boolean;
   onClose: () => void;
-  language: 'en' | 'hi';
   onSelectPreset: (preset: PredefinedSitePreset) => void;
   onOpenPdfReport: () => void;
   onOpenSmsDispatcher: () => void;
@@ -37,7 +36,6 @@ interface JudgeTourModalProps {
 export const JudgeTourModal: React.FC<JudgeTourModalProps> = ({
   isOpen,
   onClose,
-  language,
   onSelectPreset,
   onOpenPdfReport,
   onOpenSmsDispatcher,
@@ -72,7 +70,7 @@ export const JudgeTourModal: React.FC<JudgeTourModalProps> = ({
                 <span className="text-xs font-semibold text-neutral-600">HeatOps v3.4</span>
               </div>
               <h2 className="text-lg font-bold text-neutral-900 mt-0.5">
-                {language === 'en' ? 'Live Site Scenarios & Interactive Demo' : 'साइट परिदृश्य और त्वरित इंटरैक्टिव डेमो'}
+                Live Site Scenarios & Interactive Demo
               </h2>
             </div>
           </div>

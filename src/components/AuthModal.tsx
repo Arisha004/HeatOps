@@ -25,14 +25,12 @@ import { supabase, isSupabaseConfigured, setStoredLocalUser, AuthProfile } from 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  language: 'en' | 'hi';
   onAuthSuccess: (profile: AuthProfile) => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
-  language,
   onAuthSuccess,
 }) => {
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin');
@@ -41,7 +39,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState('');
   const [organization, setOrganization] = useState('L&T Infrastructure — Dwarka Expressway');
-  const [siteRegion, setSiteRegion] = useState('North India (NCR & Punjab)');
+  const [siteRegion, setSiteRegion] = useState('US Southwest (AZ & NV)');
   const [role, setRole] = useState<'hse_lead' | 'site_supervisor' | 'contractor_lead'>('hse_lead');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -213,26 +211,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     const demoProfiles: Record<string, AuthProfile> = {
       hse_lead: {
         id: 'usr_hse_8849',
-        email: 'hse.director@nationalinfra.gov.in',
-        fullName: 'Rajesh Verma',
+        email: 'hse.director@sunbeltinfra.com',
+        fullName: 'Dana Whitfield',
         role: 'hse_lead',
-        organization: 'National Highways & Infrastructure Ltd',
-        siteRegion: 'NCR Zone 4 & Expressway Corridor',
+        organization: 'Sun Belt Highways & Infrastructure LLC',
+        siteRegion: 'Maricopa Zone 4 & Loop 202 Corridor',
       },
       site_supervisor: {
         id: 'usr_sup_2910',
-        email: 'supervisor.amit@landt-dwarka.com',
-        fullName: 'Amit Kumar',
+        email: 'supervisor.morgan@granitehc.com',
+        fullName: 'Morgan Reyes',
         role: 'site_supervisor',
-        organization: 'L&T Heavy Civil — Sector 111',
-        siteRegion: 'Dwarka Expressway Package 2',
+        organization: 'Granite Heavy Civil — Package 111',
+        siteRegion: 'Loop 303 Expressway Package 2',
       },
       contractor_lead: {
         id: 'usr_cont_1048',
-        email: 'operations@shree-ram-steel.in',
-        fullName: 'Sunil Sharma',
+        email: 'operations@cactussteel.com',
+        fullName: 'Casey Nolan',
         role: 'contractor_lead',
-        organization: 'Shree Ram Structural Reinforcement',
+        organization: 'Cactus Structural Reinforcement',
         siteRegion: 'Western Urban Ring Road',
       },
     };
@@ -255,7 +253,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       if (mode === 'forgot') {
         if (!email) {
-          setErrorMessage(language === 'en' ? 'Please enter your work email address.' : 'कृपया अपना कार्य ईमेल दर्ज करें।');
+          setErrorMessage('Please enter your work email address.');
           setIsLoading(false);
           return;
         }
@@ -268,10 +266,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }
 
         setSuccessMessage(
-          language === 'en'
-            ? 'Password reset instructions have been sent to your work email.'
-            : 'पासवर्ड रीसेट लिंक आपके ईमेल पर भेज दिया गया है।'
-        );
+          'Password reset instructions have been sent to your work email.');
         setIsLoading(false);
         return;
       }
@@ -279,10 +274,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (mode === 'signup') {
         if (!email || !password || !fullName) {
           setErrorMessage(
-            language === 'en'
-              ? 'Please fill in all required fields.'
-              : 'कृपया सभी आवश्यक फ़ील्ड भरें।'
-          );
+            'Please fill in all required fields.');
           setIsLoading(false);
           return;
         }
@@ -319,10 +311,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         setStoredLocalUser(profile);
         setSuccessMessage(
-          language === 'en'
-            ? 'Account created successfully. Signing you in...'
-            : 'खाता सफलतापूर्वक बन गया। साइन इन किया जा रहा है...'
-        );
+          'Account created successfully. Signing you in...');
         setTimeout(() => {
           setIsLoading(false);
           onAuthSuccess(profile);
@@ -334,10 +323,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       // Sign In mode
       if (!email || !password) {
         setErrorMessage(
-          language === 'en'
-            ? 'Please enter your email and password.'
-            : 'कृपया अपना ईमेल और पासवर्ड दर्ज करें।'
-        );
+          'Please enter your email and password.');
         setIsLoading(false);
         return;
       }
@@ -373,7 +359,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } catch (err: any) {
       console.error('Supabase auth error:', err);
       setErrorMessage(
-        err.message || (language === 'en' ? 'Authentication failed. Please verify your credentials.' : 'लॉगिन विफल। कृपया क्रेडेंशियल जांचें।')
+        err.message || ('Authentication failed. Please verify your credentials.')
       );
       setIsLoading(false);
     }
@@ -430,7 +416,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >
-              {language === 'en' ? 'Sign In' : 'लॉगिन'}
+              Sign In
             </button>
             <button
               type="button"
@@ -445,19 +431,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   : 'text-neutral-600 hover:text-neutral-900'
               }`}
             >
-              {language === 'en' ? 'Create Account' : 'खाता बनाएं'}
+              Create Account
             </button>
           </div>
 
           <h2 className="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">
-            {mode === 'signin' && (language === 'en' ? 'Sign in to HeatOps' : 'HeatOps में साइन इन करें')}
-            {mode === 'signup' && (language === 'en' ? 'Create your enterprise account' : 'नया खाता बनाएं')}
-            {mode === 'forgot' && (language === 'en' ? 'Reset your password' : 'पासवर्ड रीसेट करें')}
+            {mode === 'signin' && ('Sign in to HeatOps')}
+            {mode === 'signup' && ('Create your enterprise account')}
+            {mode === 'forgot' && ('Reset your password')}
           </h2>
           <p className="text-xs text-neutral-600 mt-0.5">
-            {mode === 'signin' && (language === 'en' ? 'Enter your work credentials to access site thermal safety reports.' : 'साइट थर्मल सुरक्षा रिपोर्ट देखने के लिए अपना कार्य ईमेल दर्ज करें।')}
-            {mode === 'signup' && (language === 'en' ? 'Set up an authorized HSE supervisor or contractor account.' : 'सुरक्षित HSE पर्यवेक्षक या ठेकेदार खाता पंजीकृत करें।')}
-            {mode === 'forgot' && (language === 'en' ? 'Enter your registered work email to receive password reset instructions.' : 'पासवर्ड रीसेट लिंक प्राप्त करने के लिए अपना ईमेल दर्ज करें।')}
+            {mode === 'signin' && ('Enter your work credentials to access site thermal safety reports.')}
+            {mode === 'signup' && ('Set up an authorized HSE supervisor or contractor account.')}
+            {mode === 'forgot' && ('Enter your registered work email to receive password reset instructions.')}
           </p>
         </div>
 
@@ -518,7 +504,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <>
               <div>
                 <label className="block text-xs font-medium text-neutral-700 mb-1">
-                  {language === 'en' ? 'Full Name' : 'पूरा नाम'}
+                  Full Name
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
@@ -536,7 +522,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <div>
                   <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    {language === 'en' ? 'Organization' : 'संस्थान / कंपनी'}
+                    Organization
                   </label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
@@ -551,7 +537,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-medium text-neutral-700 mb-1">
-                    {language === 'en' ? 'Role' : 'पद की भूमिका'}
+                    Role
                   </label>
                   <select
                     value={role}
@@ -570,7 +556,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {/* Email Address */}
           <div>
             <label className="block text-xs font-medium text-neutral-700 mb-1">
-              {language === 'en' ? 'Work Email' : 'कार्य का ईमेल'}
+              Work Email
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
@@ -590,7 +576,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-medium text-neutral-700">
-                  {language === 'en' ? 'Password' : 'पासवर्ड'}
+                  Password
                 </label>
                 {mode === 'signin' && (
                   <button
@@ -598,7 +584,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     onClick={() => setMode('forgot')}
                     className="text-xs text-neutral-500 hover:text-neutral-900 font-medium hover:underline cursor-pointer"
                   >
-                    {language === 'en' ? 'Forgot Password?' : 'पासवर्ड भूल गए?'}
+                    Forgot Password?
                   </button>
                 )}
               </div>
@@ -635,9 +621,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ) : (
               <>
                 <span>
-                  {mode === 'signin' && (language === 'en' ? 'Sign In' : 'साइन इन करें')}
-                  {mode === 'signup' && (language === 'en' ? 'Create Account' : 'खाता बनाएं')}
-                  {mode === 'forgot' && (language === 'en' ? 'Send Reset Link' : 'रीसेट लिंक भेजें')}
+                  {mode === 'signin' && ('Sign In')}
+                  {mode === 'signup' && ('Create Account')}
+                  {mode === 'forgot' && ('Send Reset Link')}
                 </span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </>
@@ -648,24 +634,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="pt-2 text-center text-xs text-neutral-600">
             {mode === 'signin' ? (
               <span>
-                {language === 'en' ? "Don't have an account? " : 'खाता नहीं है? '}
+                {"Don't have an account? "}
                 <button
                   type="button"
                   onClick={() => setMode('signup')}
                   className="text-neutral-900 font-semibold hover:underline ml-1 cursor-pointer"
                 >
-                  {language === 'en' ? 'Sign up' : 'पंजीकरण करें'}
+                  Sign up
                 </button>
               </span>
             ) : (
               <span>
-                {language === 'en' ? 'Already have an account? ' : 'पहले से खाता है? '}
+                {'Already have an account? '}
                 <button
                   type="button"
                   onClick={() => setMode('signin')}
                   className="text-neutral-900 font-semibold hover:underline ml-1 cursor-pointer"
                 >
-                  {language === 'en' ? 'Sign in' : 'लॉगिन करें'}
+                  Sign in
                 </button>
               </span>
             )}

@@ -28,7 +28,6 @@ interface ToolboxBriefingCardProps {
   safestWindow: string;
   decisionStatus: string;
   uhiDeltaC: number;
-  language: 'en' | 'hi';
 }
 
 export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
@@ -42,9 +41,7 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
   safestWindow,
   decisionStatus,
   uhiDeltaC,
-  language: parentLanguage,
 }) => {
-  const [activeLang, setActiveLang] = useState<'en' | 'hi'>(parentLanguage === 'hi' ? 'hi' : 'en');
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -57,7 +54,7 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
     };
   }, []);
 
-  const currentText = activeLang === 'hi' ? briefing.hindi : briefing.english;
+  const currentText = briefing.english;
 
   const handleToggleSpeech = () => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -73,7 +70,7 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
 
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(currentText);
-    utterance.lang = activeLang === 'hi' ? 'hi-IN' : 'en-IN';
+    utterance.lang = 'en-US';
     utterance.rate = 0.92; // Clear, deliberate site briefing pace
     utterance.pitch = 1.0;
 
@@ -118,7 +115,7 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
           <body>
             <div class="header">
               <h1 class="title">HEATOPS — Daily Crew Safety Toolbox Briefing</h1>
-              <div class="meta">${siteName} (${location}) • Activity: ${activityType} • Date: ${new Date().toLocaleDateString('en-IN')}</div>
+              <div class="meta">${siteName} (${location}) • Activity: ${activityType} • Date: ${new Date().toLocaleDateString('en-US')}</div>
             </div>
             <div class="grid">
               <div class="item"><label>Safety Verdict</label><value>${decisionStatus}</value></div>
@@ -128,7 +125,7 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
               <div class="item"><label>Site Crew Size</label><value>${headcount} Workers</value></div>
               <div class="item"><label>Hyperlocal UHI Delta</label><value>+${uhiDeltaC}°C over city baseline</value></div>
             </div>
-            <h3 style="margin-top: 24px;">Morning Supervisor Spoken Script (${activeLang === 'hi' ? 'Devanagari Hindi' : 'English'}):</h3>
+            <h3 style="margin-top: 24px;">Morning Supervisor Spoken Script:</h3>
             <div class="speech-box">
               "${currentText}"
             </div>
@@ -158,53 +155,20 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm sm:text-base font-bold text-neutral-900 tracking-tight">
-                {activeLang === 'en' ? 'Crew Safety Toolbox Talk (Spoken Briefing)' : 'श्रमिक सुरक्षा टूलबॉक्स ब्रीफिंग (ऑडियो)'}
+                Crew Safety Toolbox Talk (Spoken Briefing)
               </h3>
               <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-extrabold uppercase font-mono tracking-wider">
                 120-WORD TALK
               </span>
             </div>
             <p className="text-xs text-neutral-500">
-              {activeLang === 'en'
-                ? 'Pre-shift verbal toolbox script for site supervisors with synthetic voice broadcast'
-                : 'साइट सुपरवाइजर के लिए सुबह की मौखिक सुरक्षा ब्रीफिंग'}
+              Pre-shift verbal toolbox script for site supervisors with synthetic voice broadcast
             </p>
           </div>
         </div>
 
-        {/* Action Controls & Language Selector */}
+        {/* Action Controls */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center bg-neutral-100 p-0.5 rounded-lg border border-neutral-200">
-            <button
-              onClick={() => {
-                if (isPlaying) window.speechSynthesis.cancel();
-                setIsPlaying(false);
-                setActiveLang('en');
-              }}
-              className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                activeLang === 'en'
-                  ? 'bg-white text-neutral-900 shadow-2xs'
-                  : 'text-neutral-600 hover:text-neutral-900'
-              }`}
-            >
-              English
-            </button>
-            <button
-              onClick={() => {
-                if (isPlaying) window.speechSynthesis.cancel();
-                setIsPlaying(false);
-                setActiveLang('hi');
-              }}
-              className={`px-2.5 py-1 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                activeLang === 'hi'
-                  ? 'bg-white text-neutral-900 shadow-2xs'
-                  : 'text-neutral-600 hover:text-neutral-900'
-              }`}
-            >
-              हिंदी
-            </button>
-          </div>
-
           <button
             id="btn-copy-toolbox"
             onClick={handleCopy}
@@ -230,7 +194,7 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-orange-950">
             <Sparkles className="w-4 h-4 text-orange-600" />
-            <span>{activeLang === 'en' ? 'Spoken Field Script for Foreperson' : 'सुपरवाइजर के लिए बोलने योग्य निर्देश'}</span>
+            <span>Spoken Field Script for Foreperson</span>
           </div>
 
           <button
@@ -245,12 +209,12 @@ export const ToolboxBriefingCard: React.FC<ToolboxBriefingCardProps> = ({
             {isPlaying ? (
               <>
                 <Square className="w-3.5 h-3.5 fill-current" />
-                <span>{activeLang === 'en' ? 'Stop Speech' : 'रोकें'}</span>
+                <span>Stop Speech</span>
               </>
             ) : (
               <>
                 <Volume2 className="w-3.5 h-3.5" />
-                <span>{activeLang === 'en' ? 'Play Spoken Voice' : 'ऑडियो सुनें'}</span>
+                <span>Play Spoken Voice</span>
               </>
             )}
           </button>

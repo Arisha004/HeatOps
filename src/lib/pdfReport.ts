@@ -6,7 +6,6 @@ export interface GeneratePdfOptions {
   userName?: string;
   userRole?: string;
   organization?: string;
-  language?: 'en' | 'hi';
 }
 
 export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
@@ -93,7 +92,7 @@ export function generateHeatRiskPdfReport(options: GeneratePdfOptions) {
   doc.setTextColor(203, 213, 225);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
-  const dateFormatted = new Date().toLocaleDateString('en-IN', {
+  const dateFormatted = new Date().toLocaleDateString('en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',

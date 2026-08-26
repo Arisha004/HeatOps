@@ -7,7 +7,6 @@ interface DailyTimelineProps {
   hourlyRisks: HourlyRisk[];
   selectedHour: HourlyRisk | null;
   onSelectHour: (hour: HourlyRisk) => void;
-  language: 'en' | 'hi';
   isPartialData?: boolean;
 }
 
@@ -15,7 +14,6 @@ export const DailyTimeline: React.FC<DailyTimelineProps> = ({
   hourlyRisks,
   selectedHour,
   onSelectHour,
-  language,
   isPartialData = false,
 }) => {
   return (
@@ -25,11 +23,11 @@ export const DailyTimeline: React.FC<DailyTimelineProps> = ({
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-neutral-600" />
           <h3 className="text-sm font-bold text-neutral-900 tracking-tight">
-            {language === 'en' ? 'Hourly Heat-Risk Timeline (6 AM – 6 PM)' : 'प्रति घंटा गर्मी जोखिम समयरेखा (6 AM – 6 PM)'}
+            Hourly Heat-Risk Timeline (6 AM – 6 PM)
           </h3>
         </div>
         <span className="text-[11px] text-neutral-500 font-medium hidden xs:inline">
-          {language === 'en' ? 'Tap segment for details' : 'विवरण के लिए किसी भी घंटे पर टैप करें'}
+          Tap segment for details
         </span>
       </div>
 
@@ -101,7 +99,7 @@ export const DailyTimeline: React.FC<DailyTimelineProps> = ({
                 <div key={lvl} className="flex items-center gap-1.5">
                   <span className={`w-2.5 h-2.5 rounded-full ${t.tailwindFill}`} />
                   <span className="font-medium text-neutral-700">
-                    {language === 'en' ? t.label : t.labelHi}
+                    {t.label}
                   </span>
                 </div>
               );
@@ -110,7 +108,7 @@ export const DailyTimeline: React.FC<DailyTimelineProps> = ({
 
           <div className="flex items-center gap-1 text-neutral-500">
             <Info className="w-3.5 h-3.5" />
-            <span>{language === 'en' ? 'HI = Heat Index (Feels Like)' : 'HI = हीट इंडेक्स (महसूस ताप)'}</span>
+            <span>HI = Heat Index (Feels Like)</span>
           </div>
         </div>
       </div>

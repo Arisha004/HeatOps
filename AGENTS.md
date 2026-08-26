@@ -2,7 +2,7 @@
 
 **What we're demoing:** a site supervisor enters a location, activity, crew size, and shift window. A 6-stage multi-agent pipeline pulls FortyGuard's hyperlocal heat data, runs a deterministic risk engine, and returns a **go / adjust / no-go** decision with an adjusted shift window, work-rest cycle, hydration rate, and a printable worker briefing — with every stage streaming live in the UI.
 
-**The one-line pitch:** *"Your site runs 4.2 °C hotter than the Mumbai average, and stays above the safe threshold for 6 straight hours. Move the pour to 05:30–11:00 and you keep all 30 workers."*
+**The one-line pitch:** *"Your site runs 4.5 °C hotter than the Phoenix average, and stays above the safe threshold for 6 straight hours. Move the pour to 05:30–11:00 and you keep all 30 workers."*
 
 This document is complete. Everything needed to build the MVP is here — formulas, thresholds, tables, prompts, and commands. No external decisions required.
 
@@ -44,9 +44,9 @@ Pulled from `https://docs-api.fortyguard.com` (confirmed live, Aug 2026).
 ### Phase 0 Fixtures & Demo Fallback
 
 Fallback fixtures for reliability:
-- `fixtures/heat_intelligence.mumbai.json`
-- `fixtures/env_params.mumbai.json`
-- `fixtures/heatmap.mumbai.json`
+- `fixtures/heat_intelligence.phoenix.json`
+- `fixtures/env_params.phoenix.json`
+- `fixtures/heatmap.phoenix.json`
 
 If FortyGuard is down or rate-limited during judging, the app serves seeded high-fidelity microclimate simulations and the demo runs flawlessly.
 
@@ -75,10 +75,10 @@ export const cityBox = (lat: number, lon: number) => siteBox(lat, lon, 15_000);
 ```
 
 **Demo locations**:
-- Dharavi, Mumbai (19.0380, 72.8538)
-- BKC, Mumbai (19.0662, 72.8697)
-- Navi Mumbai / Vashi (19.0771, 73.0000)
-- Noida / Gurugram Sector 62 (28.3900, 77.0400)
+- Downtown Phoenix, AZ (33.4484, -112.0740)
+- Sky Harbor Corridor, Phoenix, AZ (33.4353, -112.0078)
+- Houston Ship Channel, TX (29.7264, -95.2360)
+- Las Vegas Strip Corridor, NV (36.1147, -115.1728)
 
 ---
 

@@ -18,7 +18,7 @@ It fuses **hyperlocal thermal microclimate data** (via FortyGuard API and real-w
 1. **Deterministic Go / Caution / No-Go Decisions** with shift window adjustments.
 2. **Work-Rest & Hydration Schedules** calibrated to metabolic exertion.
 3. **Interactive 3D WebGL Thermal Visualizers** (Thermal Globe, Microclimate Zone, ISO WBGT Station).
-4. **Bilingual Supervisor Toolbox Talks** (English & Hindi).
+4. **Supervisor Toolbox Talks** (spoken English briefing).
 5. **Instant ISO Compliance PDF Reports** for HSE audits and regulatory compliance.
 6. **Multi-Crew SMS / WhatsApp Alert Dispatch** with cryptographically verifiable delivery tokens.
 
@@ -37,7 +37,7 @@ It fuses **hyperlocal thermal microclimate data** (via FortyGuard API and real-w
   - `Risk`: Mathematical threshold exceedance & persistence scoring.
   - `Mitigation`: Dynamic shift windows, hydration rates, and work-rest ratios.
   - `Verify`: Deterministic sanity checks and compliance guardrails.
-  - `Briefing`: 120-word spoken toolbox talks in English and Hindi.
+  - `Briefing`: 120-word spoken toolbox talks in English.
 - **Durable Persistence**: Built-in Supabase Authentication & PostgreSQL persistence for site assessments.
 - **3D Thermal Graphics**: Interactive Three.js WebGL rendering of temperature heat zones, infrared thermal shields, and ISO sensor stations.
 
@@ -136,9 +136,8 @@ heatops/
 - **Edge Case Modes**:
   - Test simulated sensor IoT data streaming (live toggle in top banner)
   - Test offline resilience (all calculations run locally with cached microclimate models)
-  - Multilingual switch (toggle English/Hindi for instant localized toolbox talks)
 
 ---
 
 ## 🛡️ License & Compliance
-Built in compliance with **ISO 7243:2017** (*Hot environments — Estimation of heat stress on working man*), **ACGIH TLV** guidelines, and **NDMA India National Heat Action Plans**.
+Built in compliance with **ISO 7243:2017** (*Hot environments — Estimation of heat stress on working man*), **ACGIH TLV** guidelines, and **NIOSH Criteria 2016-106** and **OSHA heat illness prevention guidance**.

@@ -148,20 +148,20 @@ if (process.env.GEMINI_API_KEY) {
 
 // Known coordinate fallbacks for major industrial hubs in case of upstream geocoding timeouts
 const KNOWN_COORDINATES: Record<string, { lat: number; lon: number; name: string }> = {
-  noida: { lat: 28.5355, lon: 77.3910, name: 'Noida, Uttar Pradesh' },
-  delhi: { lat: 28.6139, lon: 77.2090, name: 'New Delhi, Delhi' },
-  gurgaon: { lat: 28.4595, lon: 77.0266, name: 'Gurgaon, Haryana' },
-  gurugram: { lat: 28.4595, lon: 77.0266, name: 'Gurugram, Haryana' },
-  jaipur: { lat: 26.9124, lon: 75.7873, name: 'Jaipur, Rajasthan' },
-  lucknow: { lat: 26.8467, lon: 80.9462, name: 'Lucknow, Uttar Pradesh' },
-  kanpur: { lat: 26.4499, lon: 80.3319, name: 'Kanpur, Uttar Pradesh' },
-  mumbai: { lat: 19.0760, lon: 72.8777, name: 'Mumbai, Maharashtra' },
-  ahmedabad: { lat: 23.0225, lon: 72.5714, name: 'Ahmedabad, Gujarat' },
-  chennai: { lat: 13.0827, lon: 80.2707, name: 'Chennai, Tamil Nadu' },
-  hyderabad: { lat: 17.3850, lon: 78.4867, name: 'Hyderabad, Telangana' },
-  bengaluru: { lat: 12.9716, lon: 77.5946, name: 'Bengaluru, Karnataka' },
-  kolkata: { lat: 22.5726, lon: 88.3639, name: 'Kolkata, West Bengal' },
-  pune: { lat: 18.5204, lon: 73.8567, name: 'Pune, Maharashtra' },
+  phoenix: { lat: 33.4484, lon: -112.0740, name: 'Phoenix, Arizona' },
+  tucson: { lat: 32.2226, lon: -110.9747, name: 'Tucson, Arizona' },
+  'las vegas': { lat: 36.1699, lon: -115.1398, name: 'Las Vegas, Nevada' },
+  fresno: { lat: 36.7378, lon: -119.7871, name: 'Fresno, California' },
+  houston: { lat: 29.7604, lon: -95.3698, name: 'Houston, Texas' },
+  dallas: { lat: 32.7767, lon: -96.7970, name: 'Dallas, Texas' },
+  'new orleans': { lat: 29.9511, lon: -90.0715, name: 'New Orleans, Louisiana' },
+  austin: { lat: 30.2672, lon: -97.7431, name: 'Austin, Texas' },
+  orlando: { lat: 28.5383, lon: -81.3792, name: 'Orlando, Florida' },
+  'san antonio': { lat: 29.4241, lon: -98.4936, name: 'San Antonio, Texas' },
+  miami: { lat: 25.7617, lon: -80.1918, name: 'Miami, Florida' },
+  tampa: { lat: 27.9506, lon: -82.4572, name: 'Tampa, Florida' },
+  atlanta: { lat: 33.7490, lon: -84.3880, name: 'Atlanta, Georgia' },
+  sacramento: { lat: 38.5816, lon: -121.4944, name: 'Sacramento, California' },
 };
 
 // Geocode query using Open-Meteo Geocoding API with fallback
@@ -188,7 +188,7 @@ async function geocodeLocation(query: string): Promise<{ lat: number; lon: numbe
     console.warn('Geocoding API warning, using region heuristic:', err);
   }
 
-  return { lat: 28.6139, lon: 77.2090, displayName: query }; // Default to Delhi NCR coordinates
+  return { lat: 33.4484, lon: -112.0740, displayName: query }; // Default to Phoenix, AZ coordinates
 }
 
 // Fetch real-world hourly meteorological data from Open-Meteo
@@ -256,12 +256,12 @@ function buildOccupationalHeatProfile(
   const locLower = location.toLowerCase();
   if (fortyGuardTelemetry?.uhiDeltaC !== null && fortyGuardTelemetry?.uhiDeltaC !== undefined) {
     uhiDeltaC = fortyGuardTelemetry.uhiDeltaC;
-  } else if (locLower.includes('dharavi')) uhiDeltaC = 4.2;
-  else if (locLower.includes('bkc') || locLower.includes('bandra')) uhiDeltaC = 3.8;
-  else if (locLower.includes('vashi') || locLower.includes('navi mumbai')) uhiDeltaC = 2.9;
-  else if (locLower.includes('noida') || locLower.includes('sec-62') || locLower.includes('sector 62')) uhiDeltaC = 3.6;
-  else if (locLower.includes('jaipur') || locLower.includes('sitapura')) uhiDeltaC = 4.5;
-  else if (locLower.includes('gurgaon') || locLower.includes('cyber city')) uhiDeltaC = 3.9;
+  } else if (locLower.includes('phoenix') || locLower.includes('sky harbor')) uhiDeltaC = 4.5;
+  else if (locLower.includes('las vegas') || locLower.includes('vegas')) uhiDeltaC = 4.2;
+  else if (locLower.includes('houston') || locLower.includes('ship channel')) uhiDeltaC = 3.8;
+  else if (locLower.includes('dallas') || locLower.includes('trinity groves')) uhiDeltaC = 3.9;
+  else if (locLower.includes('miami') || locLower.includes('brickell')) uhiDeltaC = 3.4;
+  else if (locLower.includes('atlanta') || locLower.includes('beltline')) uhiDeltaC = 3.6;
 
   const dataSource: 'fortyguard-live' | 'open-meteo' | 'fixture' = fortyGuardTelemetry
     ? 'fortyguard-live'
@@ -471,8 +471,6 @@ function buildOccupationalHeatProfile(
   // 120-word Spoken Toolbox Talk for Site Foreperson / Supervisor
   const toolboxEnglish = `Good morning team. Today at ${location.split(',')[0]}, we are executing ${activityType.toLowerCase()} for ${headcount} workers. Because of dense urban surface radiation, our site runs ${uhiDeltaC}°C hotter than the city average, with ${exceedanceHours} dangerous hours starting around ${highRiskHours[0]?.hourLabel || '11:00 AM'}. Our safety decision is ${decisionStatus}. We are strictly adhering to a ${workRestCycle} protocol. Mandatory hydration is set to ${hydrationRate} litres per worker per hour. Take mandatory rest under UV-shaded shelters, use the buddy system to watch for dizziness, and report any heat exhaustion signs immediately. Let's work smart, stay hydrated, and stay safe.`;
 
-  const toolboxHindi = `नमस्ते साथियों। आज ${location.split(',')[0]} में ${activityType} का कार्य ${headcount} श्रमिकों के साथ किया जाना है। हमारे साइट का तापमान शहर के औसत से ${uhiDeltaC}°C अधिक रहेगा और दोपहर में ${exceedanceHours} घंटे अत्यधिक गर्मी रहेगी। आज का सुरक्षा निर्णय ${decisionStatus === 'ADJUST' ? 'समय समायोजन (ADJUST)' : decisionStatus === 'NO-GO' ? 'कार्य स्थगन (NO-GO)' : 'सुरक्षित (GO)'} है। सभी के लिए ${workRestCycle} का नियम और प्रति घंटे ${hydrationRate} लीटर पानी पीना अनिवार्य है। चक्कर आने पर तुरंत शेड में आराम करें और सुपरवाइजर को सूचित करें। सुरक्षित रहें।`;
-
   // Multi-Agent Pipeline Stage Logs
   const pipelineStages = [
     {
@@ -530,15 +528,15 @@ function buildOccupationalHeatProfile(
       status: 'completed' as const,
       durationMs: 110,
       details: `Audited verdict numbers against ISO 7243:2017 standards, verifying zero mathematical drift.`,
-      outputSummary: `Compliance Passed: 100% verified against OSHA/NDMA safety criteria.`,
+      outputSummary: `Compliance Passed: 100% verified against OSHA/NIOSH safety criteria.`,
     },
     {
       stageNumber: 6,
       name: 'Briefing Agent',
-      agentRole: 'Bilingual Audio & Crew Toolbox Talk Synthesizer',
+      agentRole: 'Crew Toolbox Talk & Audio Briefing Synthesizer',
       status: 'completed' as const,
       durationMs: 220,
-      details: `Generated 120-word spoken toolbox briefing in English and Devanagari Hindi for morning supervisor rollout.`,
+      details: `Generated 120-word spoken toolbox briefing for morning supervisor rollout.`,
       outputSummary: `Toolbox briefing generated with speech synthesis audio telemetry.`,
     },
   ];
@@ -576,7 +574,7 @@ function buildOccupationalHeatProfile(
     peakHeatWindow: highRiskHours.length > 0 ? `${highRiskHours[0].hourLabel} – ${highRiskHours[highRiskHours.length - 1].hourLabel}` : '12:00 PM – 3:00 PM',
     recommendedPauseWindow,
     hydratedBreaksFrequency: `${hydrationRate} L/hr (${decisionStatus === 'NO-GO' ? 'Every 20 mins in shade' : decisionStatus === 'ADJUST' ? 'Every 30 mins' : 'Every 45 mins'})`,
-    timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+    timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     
     // FortyGuard Spec Fields
     uhiDeltaC,
@@ -593,7 +591,6 @@ function buildOccupationalHeatProfile(
     waterAvailable,
     briefing: {
       english: toolboxEnglish,
-      hindi: toolboxHindi,
       wordCount: toolboxEnglish.split(' ').length,
     },
     pipelineStages,
@@ -665,7 +662,7 @@ app.post('/api/analyze-heat', async (req, res) => {
     return res.json({
       ...cached.data,
       isCached: true,
-      timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
     });
   }
 
@@ -710,7 +707,7 @@ app.post('/api/analyze-heat', async (req, res) => {
   // 4. Enhance with Gemini 2.5/3.7 Flash if AI is configured
   if (ai) {
     try {
-      const prompt = `You are HeatOps, an ISO 7243:2017 occupational heat safety AI engineer for industrial, infrastructure, and agricultural work sites in India.
+      const prompt = `You are HeatOps, an ISO 7243:2017 occupational heat safety AI engineer for industrial, infrastructure, and agricultural work sites in the United States.
 
 SITE METEOROLOGICAL TELEMETRY:
 - Location: ${displayName || location} (Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)})

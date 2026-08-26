@@ -12,10 +12,10 @@ export function HeroSection({
   onSelectPresetDemo,
 }: HeroSectionProps) {
   const presets = [
-    "Noida Sector 62 (Concrete)",
-    "Jaipur Sitapura Industrial Area (Asphalt)",
-    "Gurgaon Cyber City (Roofing)",
-    "Lucknow Gomti Nagar Extension (Material)",
+    "Phoenix Sky Harbor Corridor (Concrete)",
+    "Las Vegas I-11 Alignment (Asphalt)",
+    "Miami Brickell District (Roofing)",
+    "Houston Ship Channel (Material)",
   ];
 
   return (
@@ -31,7 +31,7 @@ export function HeroSection({
           <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
           <span className="text-green-400">LIVE TELEMETRY:</span>
           <span className="text-white">
-            North India Sub-Tropical Heat Grid Active (28.6°N)
+            US Sun Belt Heat Grid Active (33.4°N)
           </span>
         </div>
 
@@ -42,10 +42,10 @@ export function HeroSection({
         </h1>
 
         <p className="mt-5 max-w-2xl text-sm text-neutral-600 sm:text-base md:mt-6 md:text-lg">
-          North Indian ambient heat regularly breaches 42°C with lethal
+          US Sun Belt ambient heat regularly breaches 45°C with lethal
           wet-bulb humidity. HeatOps automates ISO 7243 WBGT thermal
           calculations, identifies exact work-pause windows, and dispatches
-          1-tap bilingual SMS alerts to site supervisors.
+          1-tap SMS alerts to site supervisors.
         </p>
 
         <div className="mt-8 flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row pointer-events-auto">
@@ -58,12 +58,12 @@ export function HeroSection({
             <span aria-hidden>→</span>
           </button>
           <button
-            id="btn-hero-demo-noida"
+            id="btn-hero-demo-phoenix"
             onClick={() => onSelectPresetDemo?.(0)}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-neutral-300 bg-white px-6 py-3 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-50 sm:w-auto sm:text-base cursor-pointer"
           >
             <span aria-hidden className="text-orange-500">▶</span>
-            Load Live Demo Site (Noida)
+            Load Live Demo Site (Phoenix)
           </button>
         </div>
 

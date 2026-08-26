@@ -13,7 +13,6 @@ import {
 import { AuthProfile } from '../lib/supabase';
 
 interface FooterProps {
-  language: 'en' | 'hi';
   onOpenAuth: () => void;
   user: AuthProfile | null;
   onNavigate?: (tab: 'dashboard' | 'landing') => void;
@@ -21,7 +20,6 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({
-  language,
   onOpenAuth,
   user,
   onNavigate,
@@ -66,9 +64,7 @@ export const Footer: React.FC<FooterProps> = ({
             </button>
 
             <p className="text-xs text-neutral-400 leading-relaxed max-w-md">
-              {language === 'en'
-                ? 'HeatOps provides industrial occupational thermal safety intelligence. We compute localized Wet Bulb Globe Temperature (WBGT) and metabolic stress indices conforming to ISO 7243 standards to prevent heat illness and optimize workforce safety.'
-                : 'HeatOps औद्योगिक स्तर का थर्मल सुरक्षा इंजन है। हम कार्यस्थल पर हीट स्ट्रोक की रोकथाम और सुरक्षा अनुपालन के लिए ISO 7243 मानकों के अनुसार सटीक WBGT गणना करते हैं।'}
+              HeatOps provides industrial occupational thermal safety intelligence. We compute localized Wet Bulb Globe Temperature (WBGT) and metabolic stress indices conforming to ISO 7243 standards to prevent heat illness and optimize workforce safety.
             </p>
 
             {/* Compliance & Standards Badges */}
@@ -80,7 +76,7 @@ export const Footer: React.FC<FooterProps> = ({
 
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-900 border border-neutral-800 text-[11px] text-neutral-300">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>NDMA & OSHA 3154</span>
+                <span>NIOSH & OSHA 3154</span>
               </div>
 
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-900 border border-neutral-800 text-[11px] text-neutral-300">
@@ -93,7 +89,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Col 3: Standards & Methodology */}
           <div className="space-y-3">
             <h4 className="text-xs font-semibold text-white uppercase tracking-wider">
-              {language === 'en' ? 'Standards & Science' : 'मानक एवं पद्धति'}
+              Standards & Science
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
@@ -104,7 +100,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <span className="text-neutral-300 hover:text-white transition-colors cursor-default block">
-                  NDMA Heat Action Plans (HAP)
+                  OSHA Heat Illness Prevention
                 </span>
                 <span className="text-[11px] text-neutral-500">Peak midday work cessation thresholds</span>
               </li>
@@ -126,7 +122,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Col 4: Platform & Interactive Views */}
           <div className="space-y-3">
             <h4 className="text-xs font-semibold text-white uppercase tracking-wider">
-              {language === 'en' ? 'Platform Solutions' : 'मुख्य समाधान'}
+              Platform Solutions
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
@@ -134,7 +130,7 @@ export const Footer: React.FC<FooterProps> = ({
                   onClick={() => onNavigate?.('dashboard')}
                   className="text-neutral-300 hover:text-orange-400 transition-colors text-left cursor-pointer"
                 >
-                  {language === 'en' ? 'Site Risk Evaluator' : 'साइट जोखिम विश्लेषक'}
+                  Site Risk Evaluator
                 </button>
               </li>
               <li>
@@ -142,7 +138,7 @@ export const Footer: React.FC<FooterProps> = ({
                   onClick={() => onNavigate?.('landing')}
                   className="text-neutral-300 hover:text-orange-400 transition-colors text-left cursor-pointer"
                 >
-                  {language === 'en' ? '3D Solar & Thermal Simulator' : '3D सोलर एवं ताप सिम्युलेटर'}
+                  3D Solar & Thermal Simulator
                 </button>
               </li>
               {onOpenDocs && (
@@ -151,7 +147,7 @@ export const Footer: React.FC<FooterProps> = ({
                     onClick={onOpenDocs}
                     className="text-orange-400 hover:text-orange-300 font-semibold transition-colors text-left cursor-pointer flex items-center gap-1"
                   >
-                    <span>{language === 'en' ? 'FortyGuard API & Architecture' : 'FortyGuard API दस्तावेज़'}</span>
+                    <span>FortyGuard API & Architecture</span>
                   </button>
                 </li>
               )}
@@ -162,13 +158,13 @@ export const Footer: React.FC<FooterProps> = ({
                 >
                   <Lock className="w-3 h-3 text-orange-400" />
                   {user
-                    ? (language === 'en' ? `Account: ${user.fullName}` : `खाता: ${user.fullName}`)
-                    : (language === 'en' ? 'Enterprise Sign In' : 'ठेकेदार साइन इन')}
+                    ? (`Account: ${user.fullName}`)
+                    : ('Enterprise Sign In')}
                 </button>
               </li>
               <li>
                 <span className="text-neutral-400">
-                  {language === 'en' ? 'Automated Shift Safety Reports' : 'स्वचालित शिफ्ट सुरक्षा रिपोर्ट'}
+                  Automated Shift Safety Reports
                 </span>
               </li>
             </ul>
@@ -177,12 +173,10 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Col 5: Enterprise Bulletin & Updates */}
           <div className="space-y-3">
             <h4 className="text-xs font-semibold text-white uppercase tracking-wider">
-              {language === 'en' ? 'Safety Bulletins' : 'सुरक्षा बुलेटिन'}
+              Safety Bulletins
             </h4>
             <p className="text-[11px] text-neutral-400 leading-normal">
-              {language === 'en'
-                ? 'Receive daily regional heat action plan (HAP) alerts and advisory dispatches.'
-                : 'दैनिक क्षेत्रीय हीट एक्शन प्लान और मौसम अलर्ट प्राप्त करें।'}
+              Receive daily regional heat action plan (HAP) alerts and advisory dispatches.
             </p>
             
             <form onSubmit={handleSubscribe} className="space-y-2">
@@ -218,7 +212,7 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="pt-2 border-t border-neutral-900 flex items-center justify-between text-[11px] text-neutral-500">
               <span className="flex items-center gap-1">
                 <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
-                IMD Grid 15m Sync
+                NWS Grid 15m Sync
               </span>
               <span className="text-neutral-400">safety@heatops.in</span>
             </div>

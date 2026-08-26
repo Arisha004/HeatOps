@@ -3,10 +3,9 @@ import * as THREE from 'three';
 import { Gauge, Shield, Droplets, Sun, Wind, Sparkles, Zap, ArrowRight } from 'lucide-react';
 
 interface WbgtStation3DProps {
-  language: 'en' | 'hi';
 }
 
-export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
+export const WbgtStation3D: React.FC<WbgtStation3DProps> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeSensor, setActiveSensor] = useState<'globe' | 'wet' | 'dry' | 'wind'>('globe');
 
@@ -31,10 +30,8 @@ export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
   const sensorDescriptions = {
     globe: {
       titleEn: 'Black Globe Thermometer (Tg)',
-      titleHi: 'ब्लैक ग्लोब थर्मामीटर (Tg)',
       formulaWeight: '20% Radiant Weight',
       descEn: '150mm matte black copper globe absorbing direct solar radiation and infrared thermal reflectance from tarmac/concrete.',
-      descHi: '150 मिमी मैट ब्लैक कॉपर ग्लोब जो कंक्रीट/डामर से निकलने वाली सीधी सौर और अवरक्त गर्मी को मापता है।',
       reading: '51.4°C Radiant Temp',
       color: 'text-rose-600 bg-rose-50 border-rose-200',
       badge: 'SOLAR RADIATION',
@@ -46,10 +43,8 @@ export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
     },
     wet: {
       titleEn: 'Natural Wet Bulb Sensor (Twb)',
-      titleHi: 'नेचुरल वेट बल्ब सेंसर (Twb)',
       formulaWeight: '70% Primary Weight (Evaporative)',
       descEn: 'Cotton wick dipped in distilled water measuring evaporative cooling efficiency. High humidity stops sweat evaporation, spiking heat stroke risk.',
-      descHi: 'आसुत जल में भीगी कपास की बत्ती जो पसीने के वाष्पीकरण की क्षमता मापती है। उच्च आर्द्रता में पसीना नहीं सूखता।',
       reading: '31.8°C Wet Bulb',
       color: 'text-sky-600 bg-sky-50 border-sky-200',
       badge: 'HUMIDITY & EVAPORATION',
@@ -61,10 +56,8 @@ export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
     },
     dry: {
       titleEn: 'Shielded Dry Bulb Temp (Ta)',
-      titleHi: 'शील्डेड ड्राई बल्ब तापमान (Ta)',
       formulaWeight: '10% Ambient Weight',
       descEn: 'Louvered multi-plate radiation-shielded ambient air temperature isolated from direct sun rays.',
-      descHi: 'छायादार परिवेश का तापमान जो सीधी धूप से सुरक्षित रहता है।',
       reading: '42.0°C Shade Air',
       color: 'text-amber-600 bg-amber-50 border-amber-200',
       badge: 'SHADE TEMPERATURE',
@@ -76,10 +69,8 @@ export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
     },
     wind: {
       titleEn: 'Ultrasonic Anemometer & Wind Cups',
-      titleHi: 'पवन वेग मापक (Anemometer)',
       formulaWeight: 'Convective Heat Dissipation',
       descEn: 'Measures site wind velocity. Stagnant hot air (<3 km/h) creates immediate dangerous heat traps on deep urban excavations.',
-      descHi: 'साइट पर हवा की गति मापता है। रुकी हुई गर्म हवा बहुत खतरनाक माइक्रोक्लाइमेट बनाती है।',
       reading: '4.2 km/h Wind Velocity',
       color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
       badge: 'CONVECTIVE AIRFLOW',
@@ -461,13 +452,13 @@ export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
           </div>
           <div>
             <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-              <span>{language === 'en' ? '3D WBGT Physical Sensor Mast' : '3D WBGT भौतिक सेंसर मॉडल'}</span>
+              <span>3D WBGT Physical Sensor Mast</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 border border-neutral-200">
                 ISO 7243 STANDARD
               </span>
             </h3>
             <p className="text-xs text-neutral-500">
-              {language === 'en' ? 'Interactive Wet Bulb Globe Telemetry Station' : 'सटीक तापमान एवं आर्द्रता मापक यंत्र'}
+              Interactive Wet Bulb Globe Telemetry Station
             </p>
           </div>
         </div>
@@ -601,7 +592,7 @@ export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
           <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200 space-y-2 text-xs">
             <div className="flex items-center justify-between">
               <span className="font-bold text-neutral-900">
-                {language === 'en' ? activeSensorData.titleEn : activeSensorData.titleHi}
+                {activeSensorData.titleEn}
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-neutral-200 text-neutral-800">
                 {activeSensorData.formulaWeight}
@@ -609,7 +600,7 @@ export const WbgtStation3D: React.FC<WbgtStation3DProps> = ({ language }) => {
             </div>
 
             <p className="text-neutral-600 leading-relaxed text-[11px]">
-              {language === 'en' ? activeSensorData.descEn : activeSensorData.descHi}
+              {activeSensorData.descEn}
             </p>
 
             <div className="pt-2 border-t border-neutral-200 flex items-center justify-between text-[11px]">

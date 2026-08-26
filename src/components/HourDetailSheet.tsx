@@ -17,10 +17,9 @@ import {
 interface HourDetailSheetProps {
   hourData: HourlyRisk | null;
   onClose: () => void;
-  language: 'en' | 'hi';
 }
 
-export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onClose, language }) => {
+export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onClose }) => {
   const [selectedPpe, setSelectedPpe] = useState<'standard' | 'high_vis' | 'heavy_coverall'>('standard');
 
   if (!hourData) return null;
@@ -89,17 +88,11 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
             <div className="space-y-0.5">
               <span className="font-bold">
                 {isUnknown
-                  ? language === 'en' ? 'Unverified / Stale Window' : 'अपुष्ट या पुराना डेटा'
-                  : language === 'en' ? 'Low Confidence Forecast' : 'कम विश्वास पूर्वानुमान'}
+                  ? 'Unverified / Stale Window': 'Low Confidence Forecast'}
               </span>
               <p>
                 {isUnknown
-                  ? language === 'en'
-                    ? 'Live microclimate telemetry interrupted for this hour. Exercise on-site thermal caution.'
-                    : 'इस घंटे के लिए लाइव डेटा उपलब्ध नहीं है। साइट पर तापमान जांचें।'
-                  : language === 'en'
-                  ? 'Rapid convective cloud or dust flux detected. Verify ambient temp with on-site thermometer.'
-                  : 'मौसम का तेज़ी से बदलाव संभव है। साइट पर थर्मामीटर से दोबारा जांचें।'}
+                  ? 'Live microclimate telemetry interrupted for this hour. Exercise on-site thermal caution.': 'Rapid convective cloud or dust flux detected. Verify ambient temp with on-site thermometer.'}
               </p>
             </div>
           </div>
@@ -110,7 +103,7 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
           <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 space-y-0.5">
             <div className="flex items-center gap-1 text-[11px] text-neutral-500 font-semibold">
               <Thermometer className="w-3.5 h-3.5 text-neutral-600" />
-              <span>{language === 'en' ? 'Dry Bulb' : 'तापमान'}</span>
+              <span>Dry Bulb</span>
             </div>
             <p className="text-base font-bold font-mono text-neutral-900">{isUnknown ? '--' : `${hourData.tempC}°C`}</p>
           </div>
@@ -118,7 +111,7 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
           <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 space-y-0.5">
             <div className="flex items-center gap-1 text-[11px] text-neutral-500 font-semibold">
               <Shield className="w-3.5 h-3.5 text-orange-600" />
-              <span>{language === 'en' ? 'WBGT Index' : 'महसूस ताप'}</span>
+              <span>WBGT Index</span>
             </div>
             <p className="text-base font-bold font-mono text-orange-950">{isUnknown ? '--' : `${hourData.heatIndexC}°C`}</p>
           </div>
@@ -126,7 +119,7 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
           <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 space-y-0.5">
             <div className="flex items-center gap-1 text-[11px] text-neutral-500 font-semibold">
               <Droplets className="w-3.5 h-3.5 text-blue-600" />
-              <span>{language === 'en' ? 'Humidity' : 'नमी'}</span>
+              <span>Humidity</span>
             </div>
             <p className="text-base font-bold font-mono text-neutral-900">{isUnknown ? '--' : `${hourData.humidity}%`}</p>
           </div>
@@ -134,7 +127,7 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
           <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 space-y-0.5">
             <div className="flex items-center gap-1 text-[11px] text-neutral-500 font-semibold">
               <Sun className="w-3.5 h-3.5 text-amber-600" />
-              <span>{language === 'en' ? 'UV Index' : 'UV सूचकांक'}</span>
+              <span>UV Index</span>
             </div>
             <p className="text-base font-bold font-mono text-neutral-900">{isUnknown ? '--' : `${hourData.uvIndex} / 12`}</p>
           </div>
@@ -145,7 +138,7 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
           <div className="flex items-center justify-between">
             <span className="font-bold text-xs text-neutral-900 flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5 text-orange-600" />
-              {language === 'en' ? 'PPE Thermal Strain Modifier' : 'पीपीई थर्मल स्ट्रेन गणना'}
+              PPE Thermal Strain Modifier
             </span>
             <span className="font-mono text-xs font-bold text-orange-700">
               Adj. WBGT: {adjustedHeatIndex.toFixed(1)}°C
@@ -199,14 +192,11 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
         {/* Actionable Recommendation */}
         <div className="p-3.5 rounded-xl bg-neutral-900 text-white space-y-1">
           <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block">
-            {language === 'en' ? 'Hour Safety Directive' : 'घंटे का सुरक्षा निर्देश'}
+            Hour Safety Directive
           </span>
           <p className="text-xs sm:text-sm font-semibold leading-snug">
             {isUnknown
-              ? language === 'en'
-                ? 'Check ambient wet-bulb reading manually on site before resuming.'
-                : 'साइट पर मैन्युअल तापमान जांचें।'
-              : hourData.recommendation}
+              ? 'Check ambient wet-bulb reading manually on site before resuming.': hourData.recommendation}
           </p>
         </div>
 
@@ -216,7 +206,7 @@ export const HourDetailSheet: React.FC<HourDetailSheetProps> = ({ hourData, onCl
           onClick={onClose}
           className="w-full py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-bold text-xs transition-colors min-h-[44px] cursor-pointer"
         >
-          {language === 'en' ? 'Done' : 'पूर्ण'}
+          Done
         </button>
       </div>
     </div>

@@ -3,10 +3,9 @@ import { RISK_COLOR_TOKENS } from '../constants';
 import { Code, Layers, Palette, Type, Grid } from 'lucide-react';
 
 interface DesignTokensViewProps {
-  language: 'en' | 'hi';
 }
 
-export const DesignTokensView: React.FC<DesignTokensViewProps> = ({ language }) => {
+export const DesignTokensView: React.FC<DesignTokensViewProps> = () => {
   return (
     <div id="design-tokens-container" className="max-w-2xl mx-auto py-4 px-4 space-y-6">
       <div className="space-y-1">
@@ -78,7 +77,7 @@ export const DesignTokensView: React.FC<DesignTokensViewProps> = ({ language }) 
           <div className="p-3 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-between">
             <div>
               <span className="font-mono text-neutral-400 text-[10px]">Heading (20px / 26px)</span>
-              <p className="text-xl font-bold text-neutral-900">Noida Sec-62 Concrete Pouring</p>
+              <p className="text-xl font-bold text-neutral-900">Phoenix Sky Harbor Concrete Pouring</p>
             </div>
             <span className="font-mono text-neutral-500">20px / lh 26px</span>
           </div>

@@ -7,7 +7,6 @@ interface EdgeCaseBannersProps {
   isPartialData: boolean;
   isLowConfidence: boolean;
   hasSensorSpike?: boolean;
-  language: 'en' | 'hi';
 }
 
 export const EdgeCaseBanners: React.FC<EdgeCaseBannersProps> = ({
@@ -16,7 +15,6 @@ export const EdgeCaseBanners: React.FC<EdgeCaseBannersProps> = ({
   isPartialData,
   isLowConfidence,
   hasSensorSpike = false,
-  language,
 }) => {
   return (
     <div className="space-y-2">
@@ -27,12 +25,10 @@ export const EdgeCaseBanners: React.FC<EdgeCaseBannersProps> = ({
             <WifiOff className="w-4 h-4 text-amber-700 shrink-0" />
             <div>
               <span className="font-bold block">
-                {language === 'en' ? 'Connection Lost — Showing Offline Cached Risk Data' : 'कनेक्शन बंद — सहेजा गया डेटा दिखाया जा रहा है'}
+                Connection Lost — Showing Offline Cached Risk Data
               </span>
               <span className="text-[11px] text-amber-800">
-                {language === 'en'
-                  ? 'Last updated today at 07:15 AM. On-site decisions remain active.'
-                  : 'अंतिम अपडेट आज सुबह 07:15 बजे हुआ था।'}
+                Last updated today at 07:15 AM. On-site decisions remain active.
               </span>
             </div>
           </div>
@@ -43,7 +39,7 @@ export const EdgeCaseBanners: React.FC<EdgeCaseBannersProps> = ({
             className="px-3 py-1.5 rounded-lg bg-amber-900 text-white font-semibold text-xs hover:bg-amber-800 transition-colors shrink-0 flex items-center gap-1 min-h-[36px]"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>{language === 'en' ? 'Retry' : 'पुनः प्रयास'}</span>
+            <span>Retry</span>
           </button>
         </div>
       )}
@@ -54,11 +50,9 @@ export const EdgeCaseBanners: React.FC<EdgeCaseBannersProps> = ({
           <FileWarning className="w-4 h-4 text-neutral-600 shrink-0" />
           <div>
             <span className="font-bold">
-              {language === 'en' ? 'Partial Satellite Feed' : 'अधूरा सैटेलाइट फीड'}:
+              Partial Satellite Feed:
             </span>{' '}
-            {language === 'en'
-              ? 'Live weather sensor feed interrupted after 1:00 PM. Afternoon hours marked UNKNOWN — verify locally.'
-              : 'दोपहर 1:00 बजे के बाद का डेटा अप्राप्त है। दोपहर के घंटों की जांच साइट पर करें।'}
+            Live weather sensor feed interrupted after 1:00 PM. Afternoon hours marked UNKNOWN — verify locally.
           </div>
         </div>
       )}
@@ -69,11 +63,9 @@ export const EdgeCaseBanners: React.FC<EdgeCaseBannersProps> = ({
           <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
           <div>
             <span className="font-bold text-amber-300">
-              {language === 'en' ? 'High Meteorological Flux' : 'मौसम में तेज़ी से बदलाव'}:
+              High Meteorological Flux:
             </span>{' '}
-            {language === 'en'
-              ? 'Model confidence moderate for afternoon windows. Increase on-site WBGT reading frequency.'
-              : 'मॉडल विश्वसनीयता मध्यम है। साइट पर थर्मामीटर जांच बढ़ाएँ।'}
+            Model confidence moderate for afternoon windows. Increase on-site WBGT reading frequency.
           </div>
         </div>
       )}
@@ -84,12 +76,10 @@ export const EdgeCaseBanners: React.FC<EdgeCaseBannersProps> = ({
           <AlertOctagon className="w-4 h-4 text-red-700 shrink-0" />
           <div>
             <span className="font-bold">
-              {language === 'en' ? 'Extreme Microclimate Thermal Spike Flagged' : 'अत्यधिक तापमान वृद्धि दर्ज'}
+              Extreme Microclimate Thermal Spike Flagged
             </span>
             <p className="text-[11px] mt-0.5">
-              {language === 'en'
-                ? 'Local ambient sensor registered a +4.2°C thermal surge at 12:30 PM (Roofing asphalt heat reflection). Unaveraged for safety transparency.'
-                : 'लोकल सेंसर में अचानक +4.2°C तापमान वृद्धि दर्ज हुई।'}
+              Local ambient sensor registered a +4.2°C thermal surge at 12:30 PM (Roofing asphalt heat reflection). Unaveraged for safety transparency.
             </p>
           </div>
         </div>

@@ -70,7 +70,7 @@ export const mapSupabaseUserToProfile = (user: User): AuthProfile => {
     fullName: meta.full_name || user.email?.split('@')[0] || 'Contractor Supervisor',
     role: meta.role || 'site_supervisor',
     organization: meta.organization || 'L&T Heavy Civil / Sub-Contractor',
-    siteRegion: meta.site_region || 'North India Zone 1',
+    siteRegion: meta.site_region || 'US Sun Belt Zone 1',
   };
 };
 

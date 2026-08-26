@@ -6,29 +6,20 @@ import { DailyTimelineSkeleton } from './DailyTimelineSkeleton';
 interface LoadingScreenProps {
   location: string;
   activityType: string;
-  language: 'en' | 'hi';
 }
 
-const HONEST_STATUS_STEPS_EN = [
-  'Querying IMD & microclimate satellite telemetry...',
+const HONEST_STATUS_STEPS = [
+  'Querying NOAA/NWS & microclimate satellite telemetry...',
   'Calculating WBGT (Wet Bulb Globe Temperature) index...',
   'Factoring exertion thermal strain for activity...',
   'Evaluating labor pause windows & safety thresholds (ISO 7243)...',
   'Synthesizing AI contractor safety verdict & directives...',
 ];
 
-const HONEST_STATUS_STEPS_HI = [
-  'मौसम और सैटेलाइट डेटा प्राप्त किया जा रहा है...',
-  'WBGT (वेट बल्ब ग्लोब तापमान) इंडेक्स की गणना...',
-  'कार्य तनाव और गर्मी गुणांक का आकलन...',
-  'मजदूरों के लिए सुरक्षा और ब्रेक का समय तय किया जा रहा है...',
-  'साइट मैनेजर के लिए स्पष्ट निर्देश तैयार किए जा रहे हैं...',
-];
-
-export const LoadingScreen: React.FC<LoadingScreenProps> = ({ location, activityType, language }) => {
+export const LoadingScreen: React.FC<LoadingScreenProps> = ({ location, activityType }) => {
   const [stepIdx, setStepIdx] = useState(0);
 
-  const steps = language === 'hi' ? HONEST_STATUS_STEPS_HI : HONEST_STATUS_STEPS_EN;
+  const steps = HONEST_STATUS_STEPS;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -49,7 +40,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ location, activity
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-white tracking-tight">
-                  {language === 'en' ? 'Evaluating Microclimate Heat Risk' : 'माइक्रोक्लाइमेट हीट रिस्क का मूल्यांकन जारी'}
+                  Evaluating Microclimate Heat Risk
                 </h3>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-950 border border-emerald-500/40 text-emerald-300">
                   <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-400" />
@@ -89,10 +80,10 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ location, activity
       </div>
 
       {/* 1. Skeleton Loader for Verdict & Stats */}
-      <VerdictAndStatsSkeleton language={language} />
+      <VerdictAndStatsSkeleton />
 
       {/* 2. Skeleton Loader for Daily Timeline */}
-      <DailyTimelineSkeleton language={language} />
+      <DailyTimelineSkeleton />
 
       {/* 3. Skeleton Loader for AI Reasoning Card */}
       <div className="bg-white rounded-2xl border border-neutral-200 p-4 sm:p-5 space-y-3 shadow-xs animate-pulse">

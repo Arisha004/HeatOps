@@ -3,10 +3,9 @@ import * as THREE from 'three';
 import { HardHat, ShieldCheck, Layers, Users, Zap, AlertTriangle, Eye } from 'lucide-react';
 
 interface SiteThermalZone3DProps {
-  language: 'en' | 'hi';
 }
 
-export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }) => {
+export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedZone, setSelectedZone] = useState<'asphalt' | 'roofing' | 'concrete' | 'shelter'>('roofing');
 
@@ -39,11 +38,9 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
   const zones = {
     roofing: {
       titleEn: 'Corrugated Metal Roofing Crew',
-      titleHi: 'टीन शेड और छत का काम',
       heatDelta: '+3.8°C Thermal Reflection',
       risk: 'CRITICAL NO-GO',
       descEn: 'Roofers on elevated galvanized iron sheets. Thermal conduction through boots and gloves with zero convective cross-breeze causes acute dizziness.',
-      descHi: 'टीन शेड पर कार्य कर रहे श्रमिक। लोहे की गर्म चादरों और तेज धूप से चक्कर व बेहोशी का जोखिम।',
       badgeColor: 'bg-red-100 text-red-800 border-red-200',
       workerTitle: 'Structural Sheet Installer',
       workerGear: 'Fall-Arrest Harness, Heat Insulated Gloves, Hardhat',
@@ -53,11 +50,9 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
     },
     asphalt: {
       titleEn: 'Asphalt & Bitumen Road Crew',
-      titleHi: 'डामर और सड़क निर्माण श्रमिक',
       heatDelta: '+4.5°C Radiative Exertion',
       risk: 'CRITICAL NO-GO',
       descEn: 'Paving crew on 60°C black bitumen. Direct solar absorption, lack of shade, and continuous forward-leaning shoveling create dangerous cardiac heat stress.',
-      descHi: '60°C गर्म डामर पर सड़क मजदूर। सीधी धूप और भारी शारीरिक श्रम से हीट स्ट्रोक का अधिकतम खतरा।',
       badgeColor: 'bg-red-100 text-red-800 border-red-200',
       workerTitle: 'Road Surface Laborer (Raker / Tamper)',
       workerGear: 'Class 3 Safety Vest, Heat-Proof Boots, UV Neck Flap Hardhat',
@@ -67,11 +62,9 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
     },
     concrete: {
       titleEn: 'Reinforced Concrete Pouring Gang',
-      titleHi: 'कंक्रीट ढलाई कार्य दल',
       heatDelta: '+2.5°C Hydration Reaction',
       risk: 'HIGH RISK',
       descEn: 'Cement exothermic curing generates sustained ambient heat while continuous vibrator and float tool handling triggers high metabolic heat buildup.',
-      descHi: 'सीमेंट की रासायनिक गर्मी और निरंतर वाइब्रेटर चलाने से शरीर का तापमान तेजी से बढ़ता है।',
       badgeColor: 'bg-orange-100 text-orange-800 border-orange-200',
       workerTitle: 'Concrete Finisher & Screeder',
       workerGear: 'Waterproof Safety Boots, Hi-Vis Vest, Hardhat',
@@ -81,11 +74,9 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
     },
     shelter: {
       titleEn: 'Air-Cooled Hydration & ORS Bay',
-      titleHi: 'शीतल पेय और आराम आश्रय',
       heatDelta: '-8.0°C Microclimate Relief',
       risk: 'SAFE ZONE',
       descEn: 'Misting fans, cool drinking water, electrolyte ORS packets, and UV canopy shade allow rapid physiological core cooling and recovery.',
-      descHi: 'ओआरएस घोल, ठंडे पंखे और छायादार शेड जहां श्रमिक सुरक्षित रूप से आराम कर सकते हैं।',
       badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
       workerTitle: 'Resting Field Worker',
       workerGear: 'Hardhat Removed, Drinking Electrolyte Solution',
@@ -661,13 +652,13 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
           </div>
           <div>
             <h3 className="text-sm font-bold text-neutral-900 flex items-center gap-2">
-              <span>{language === 'en' ? '3D Construction Crew & Activity Zones' : '3D निर्माण श्रमिक एवं कार्य क्षेत्र'}</span>
+              <span>3D Construction Crew & Activity Zones</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
                 ACTIVE CREW MODELS
               </span>
             </h3>
             <p className="text-xs text-neutral-500">
-              {language === 'en' ? 'Real-time physiological strain across trade specializations' : 'विभिन्न निर्माण कार्यों और श्रमिकों पर गर्मी के प्रभाव का 3D मॉडल'}
+              Real-time physiological strain across trade specializations
             </p>
           </div>
         </div>
@@ -738,7 +729,7 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
                   }`}
                 >
                   <span className="truncate block font-bold">
-                    {language === 'en' ? item.titleEn : item.titleHi}
+                    {item.titleEn}
                   </span>
                   <span
                     className={`text-[10px] font-mono block mt-0.5 ${
@@ -756,7 +747,7 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
           <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200 space-y-2.5 text-xs">
             <div className="flex items-center justify-between">
               <span className="font-bold text-neutral-900">
-                {language === 'en' ? activeZone.titleEn : activeZone.titleHi}
+                {activeZone.titleEn}
               </span>
               <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${activeZone.badgeColor}`}>
                 {activeZone.risk}
@@ -764,7 +755,7 @@ export const SiteThermalZone3D: React.FC<SiteThermalZone3DProps> = ({ language }
             </div>
 
             <p className="text-neutral-600 leading-relaxed text-[11px]">
-              {language === 'en' ? activeZone.descEn : activeZone.descHi}
+              {activeZone.descEn}
             </p>
 
             <div className="p-2 bg-white rounded-lg border border-neutral-200 space-y-1">

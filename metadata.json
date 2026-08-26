@@ -1,6 +1,6 @@
 {
   "name": "HeatOps",
-  "description": "Heat-risk decision tool for construction and logistics site managers in Urban and Semi-Urban India.",
+  "description": "Heat-risk decision tool for construction and logistics site managers across the US Sun Belt.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
