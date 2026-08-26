@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe } from "@/components/ui/globe";
+
 
 interface HeroSectionProps {
   onLaunchTool?: () => void;
@@ -20,10 +20,7 @@ export function HeroSection({
 
   return (
     <section className="relative w-full overflow-hidden bg-transparent px-4 pb-16 pt-6 sm:px-6 sm:pt-10 md:pb-24 md:pt-12 lg:pb-28">
-      {/* Globe background 3D layer */}
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden z-0 pointer-events-auto">
-        <Globe className="top-0 scale-95 sm:scale-105 md:scale-110" />
-      </div>
+     
 
       {/* Content */}
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center text-center pointer-events-none">
