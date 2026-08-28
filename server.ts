@@ -164,12 +164,20 @@ const KNOWN_COORDINATES: Record<string, { lat: number; lon: number; name: string
   sacramento: { lat: 38.5816, lon: -121.4944, name: 'Sacramento, California' },
 };
 
-// Geocode query using Open-Meteo Geocoding API with fallback
-async function geocodeLocation(query: string): Promise<{ lat: number; lon: number; displayName: string }> {
+// Geocode query using Open-Meteo Geocoding API.
+// `resolved` is false when neither the offline table nor the geocoding API
+// could place the query. Callers MUST NOT present the returned coordinates
+// as the user's site in that case - see /api/analyze-heat, which rejects the
+// request instead. Silently substituting a default city would attribute one
+// city's weather (and one city's FortyGuard credits) to a site that was never
+// located.
+async function geocodeLocation(
+  query: string
+): Promise<{ lat: number; lon: number; displayName: string; resolved: boolean }> {
   const clean = query.trim().toLowerCase();
   for (const [key, val] of Object.entries(KNOWN_COORDINATES)) {
     if (clean.includes(key)) {
-      return { lat: val.lat, lon: val.lon, displayName: query };
+      return { lat: val.lat, lon: val.lon, displayName: query, resolved: true };
     }
   }
 
@@ -181,14 +189,16 @@ async function geocodeLocation(query: string): Promise<{ lat: number; lon: numbe
       if (data.results && data.results.length > 0) {
         const item = data.results[0];
         const disp = [item.name, item.admin1, item.country].filter(Boolean).join(', ');
-        return { lat: item.latitude, lon: item.longitude, displayName: disp || query };
+        return { lat: item.latitude, lon: item.longitude, displayName: disp || query, resolved: true };
       }
     }
   } catch (err) {
     console.warn('Geocoding API warning, using region heuristic:', err);
   }
 
-  return { lat: 33.4484, lon: -112.0740, displayName: query }; // Default to Phoenix, AZ coordinates
+  // Unresolvable: return a placeholder flagged as unresolved so the caller
+  // fails loudly rather than reporting Phoenix telemetry under this name.
+  return { lat: 33.4484, lon: -112.0740, displayName: query, resolved: false };
 }
 
 // Fetch real-world hourly meteorological data from Open-Meteo
@@ -667,7 +677,18 @@ app.post('/api/analyze-heat', async (req, res) => {
   }
 
   // 1. Geocode location to get real lat/lon
-  const { lat, lon, displayName } = await geocodeLocation(location);
+  const { lat, lon, displayName, resolved } = await geocodeLocation(location);
+
+  // An unplaceable site is a hard stop, not a silent fallback. Continuing here
+  // would run the whole ISO 7243 pipeline on default coordinates and label the
+  // output with the user's typed name - a safety verdict for the wrong place.
+  if (!resolved) {
+    return res.status(422).json({
+      error: 'unresolved_location',
+      message:
+        "We couldn't verify that location. Please select or enter a valid landmark or district name (e.g., 'Downtown Phoenix, Arizona').",
+    });
+  }
 
   // Reason FortyGuard live data won't be used, for accurate UI messaging —
   // computed up front so the "Fetch Agent" stage can report a specific,

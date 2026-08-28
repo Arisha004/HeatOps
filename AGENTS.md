@@ -13,12 +13,19 @@ This document is complete. Everything needed to build the MVP is here — formul
 Environment Variables:
 ```env
 FORTYGUARD_API_KEY=
-ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+APP_URL=
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 ```
 
-Both API keys stay server-side. The browser never sees either — all FortyGuard and AI calls happen in the route handler.
+The AI provider is **Google Gemini** (`gemini-2.5-flash`, via `@google/genai`). An
+earlier draft of this spec assumed Anthropic; the implementation never did, so
+there is no `ANTHROPIC_API_KEY`.
+
+`FORTYGUARD_API_KEY` and `GEMINI_API_KEY` stay server-side. The browser never sees
+either — all FortyGuard and AI calls happen in the route handler. Only the
+`VITE_`-prefixed Supabase values are exposed to the client, by design.
 
 ---
 
@@ -41,14 +48,27 @@ Pulled from `https://docs-api.fortyguard.com` (confirmed live, Aug 2026).
 2. **Wind has no FortyGuard source.** Neither `heatmap`, `env_params`, nor `heat_intelligence` returns wind speed — it comes from Open-Meteo in every code path.
 3. **Quota is metered, and `heat_intelligence` is Premium-tier and slow.** The cache is mandatory, and the PDF-report endpoint must stay opt-in (a user action), never triggered automatically per analysis.
 
-### Phase 0 Fixtures & Demo Fallback
+### Demo Fallback
 
-Fallback fixtures for reliability:
-- `fixtures/heat_intelligence.phoenix.json`
-- `fixtures/env_params.phoenix.json`
-- `fixtures/heatmap.phoenix.json`
+There is **no `fixtures/` directory** — the fallback is code, not JSON files. A
+Phase 0 fixture set was planned and never built; the layered fallback below
+replaced it.
 
-If FortyGuard is down or rate-limited during judging, the app serves seeded high-fidelity microclimate simulations and the demo runs flawlessly.
+If FortyGuard is unavailable — no key, coordinates outside its US-only coverage,
+or a failed/timed-out call — `fetchFortyGuardTelemetry()` returns `null` and the
+pipeline degrades in this order:
+
+1. **`fortyguard-live`** — real `/v1/heatmap` UHI delta + `/v1/env_params` readings.
+2. **`open-meteo`** — live hourly forecast; UHI delta falls back to the per-city
+   calibration table in `buildOccupationalHeatProfile()`.
+3. **`fixture`** — synthetic diurnal curve, used only when Open-Meteo is also down.
+
+The active tier is reported honestly in the response as `dataSource`, and the
+Fetch Agent stage names the specific reason FortyGuard was skipped
+(`no-key` / `outside-us-coverage`) rather than a generic "unavailable".
+
+Verify the live path before judging with `node scripts/verify-fortyguard-setup.mjs`
+(costs 2 credits, Phoenix coordinates).
 
 ---
 

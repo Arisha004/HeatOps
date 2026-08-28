@@ -241,6 +241,19 @@ export default function App() {
         body: JSON.stringify(config),
       });
 
+      // 422 means the server could not place this site. That is a real answer,
+      // not a network failure - fall through to the offline generator here and
+      // we'd hand the supervisor a fabricated verdict for an unknown location.
+      if (res.status === 422) {
+        const body = await res.json().catch(() => null);
+        showToast(
+          body?.message ||
+            "We couldn't verify that location. Please select or enter a valid landmark or district name (e.g., 'Downtown Phoenix, Arizona')."
+        );
+        setCurrentView('setup');
+        return;
+      }
+
       if (!res.ok) {
         throw new Error('Failed to fetch heat analysis');
       }
