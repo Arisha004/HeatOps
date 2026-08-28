@@ -941,6 +941,23 @@ app.get('/api/report-status/:activityId', async (req, res) => {
   }
 });
 
+// Unmatched /api/* requests answer in JSON, and say which URL actually arrived.
+// Registered after every route above, so it only catches genuine misses.
+//
+// The host rewrites /api/* to this one function, which only works if the
+// original path is forwarded rather than the rewrite destination. When that
+// assumption breaks, every route misses and Express's default handler returns an
+// HTML 404 that looks nothing like an API response - and the client reports a
+// generic failure. Echoing receivedUrl turns that into a one-request diagnosis:
+// a receivedUrl of "/api/index" means the path was rewritten, not forwarded.
+app.use('/api', (req, res) => {
+  res.status(404).json({
+    error: 'unknown_api_route',
+    receivedUrl: req.originalUrl,
+    hint: 'If receivedUrl is /api/index, the platform rewrote the path instead of forwarding the original one.',
+  });
+});
+
 // This module is the API surface and nothing else: no listen, no static file
 // handling, and above all no reference to Vite.
 //
