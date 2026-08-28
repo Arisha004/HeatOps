@@ -22,7 +22,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   let app: ExpressApp;
   try {
     if (!appPromise) {
-      appPromise = import('../server').then((m) => m.default as unknown as ExpressApp);
+      // The .js extension is required, not optional. This package is ESM
+      // ("type": "module"), and Node's ESM resolver does no extension guessing:
+      // '../server' resolves to the literal path /var/task/server and fails with
+      // ERR_MODULE_NOT_FOUND. tsconfig uses moduleResolution "bundler", which
+      // permits the extensionless form at typecheck time, so `tsc --noEmit`
+      // stays green while every deployed request 500s. TypeScript maps the .js
+      // specifier back to server.ts at build time.
+      appPromise = import('../server.js').then((m) => m.default as unknown as ExpressApp);
     }
     app = await appPromise;
   } catch (err) {
@@ -31,9 +38,25 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const message = err instanceof Error ? err.message : String(err);
     const stack = err instanceof Error ? String(err.stack || '').split('\n').slice(0, 6) : [];
     console.error('Failed to load server module:', err);
+
+    // A resolution failure is ambiguous between "wrong specifier" and "the file
+    // was never deployed", and those need opposite fixes. Listing what actually
+    // shipped settles it without another guess-and-redeploy cycle.
+    let deployedFiles: Record<string, string[] | string> = {};
+    try {
+      const { readdirSync } = await import('node:fs');
+      const root = process.cwd();
+      deployedFiles = {
+        [root]: readdirSync(root),
+        [`${root}/api`]: readdirSync(`${root}/api`),
+      };
+    } catch (listErr) {
+      deployedFiles = { error: listErr instanceof Error ? listErr.message : String(listErr) };
+    }
+
     res.statusCode = 500;
     res.setHeader('content-type', 'application/json');
-    res.end(JSON.stringify({ error: 'server_module_load_failed', message, stack }, null, 2));
+    res.end(JSON.stringify({ error: 'server_module_load_failed', message, stack, deployedFiles }, null, 2));
     return;
   }
 

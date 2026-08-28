@@ -9,7 +9,7 @@ import {
   checkStatus,
   celsiusToFahrenheit,
   type FGDateTime,
-} from './lib/fortyguard';
+} from './lib/fortyguard.js';
 
 const app = express();
 

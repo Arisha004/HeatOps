@@ -3,11 +3,11 @@
 //
 // This is deliberately a separate file from server.ts. Vite is imported here at
 // the top level, where it belongs, and server.ts stays free of it — so the
-// serverless bundler that builds api/[...path].ts never sees Vite in its import
+// serverless function in api/index.ts never sees Vite in its import
 // graph. Run with `npm run dev`.
 import 'dotenv/config';
 import { createServer as createViteServer } from 'vite';
-import app from './server';
+import app from './server.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 
