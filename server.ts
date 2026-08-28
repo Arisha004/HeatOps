@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
 import {
   siteBox,
@@ -13,7 +12,6 @@ import {
 } from './lib/fortyguard';
 
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
 
@@ -943,36 +941,18 @@ app.get('/api/report-status/:activityId', async (req, res) => {
   }
 });
 
-async function startServer() {
-  if (process.env.NODE_ENV !== 'production') {
-    // Imported lazily: Vite is a dev-only dependency here, and a top-level
-    // import would pull it into the serverless bundle in production.
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`HeatOps server running on http://localhost:${PORT}`);
-  });
-}
-
-// On Vercel there is no long-lived process to listen on a port: `api/index.ts`
-// imports `app` and Vercel invokes it per-request. Calling startServer() there
-// would also register the static/SPA handlers, which the CDN already serves.
-// Locally (`npm run dev` / `npm start`) this is still a normal Express server.
-if (!process.env.VERCEL) {
-  startServer();
-}
-
+// This module is the API surface and nothing else: no listen, no static file
+// handling, and above all no reference to Vite.
+//
+// It used to reach Vite through `await import('vite')` inside a dev-only branch,
+// on the assumption that a lazy import stays out of the production bundle. It
+// does not. The serverless bundler resolves any import with a static specifier
+// whether or not the branch can run, so Vite - and its native fsevents,
+// lightningcss and esbuild binaries - got pulled into the function and crashed
+// it at load with FUNCTION_INVOCATION_FAILED, before a single route ran.
+//
+// Keeping the two servers in their own entrypoints (dev-server.ts,
+// prod-server.ts) means that can't regress: nothing in this file's import graph
+// is dev-only, so there is nothing for the bundler to drag in.
 export { app };
 export default app;
