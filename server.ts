@@ -2,7 +2,6 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { GoogleGenAI, Type } from '@google/genai';
-import { createServer as createViteServer } from 'vite';
 import {
   siteBox,
   fetchHeatmapStats,
@@ -892,6 +891,9 @@ app.get('/api/report-status/:activityId', async (req, res) => {
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    // Imported lazily: Vite is a dev-only dependency here, and a top-level
+    // import would pull it into the serverless bundle in production.
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -910,4 +912,13 @@ async function startServer() {
   });
 }
 
-startServer();
+// On Vercel there is no long-lived process to listen on a port: `api/index.ts`
+// imports `app` and Vercel invokes it per-request. Calling startServer() there
+// would also register the static/SPA handlers, which the CDN already serves.
+// Locally (`npm run dev` / `npm start`) this is still a normal Express server.
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export { app };
+export default app;
