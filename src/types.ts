@@ -64,6 +64,8 @@ export interface RiskAnalysisResult {
   latitude?: number;  // resolved site coordinates, needed for the FortyGuard report request
   longitude?: number;
   fortyGuardNote?: string; // human-readable reason FortyGuard live data wasn't used, when applicable
+  aiEnhanced?: boolean; // true when the verdict was authored by Gemini, false when it came straight from the deterministic ISO 7243 engine
+  aiNote?: string; // human-readable reason the AI narrative is missing, when applicable
   currentTemp: number;
   currentHeatIndex: number;
   currentHumidity: number;

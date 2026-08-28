@@ -267,61 +267,17 @@ export default function App() {
       setCurrentView('dashboard');
     } catch (err) {
       console.error('Heat analysis API error:', err);
-      // Fallback offline generator if network is simulated or disconnected
-      const fallbackResult: RiskAnalysisResult = {
-        id: `site-offline-${Date.now()}`,
-        siteName: config.siteName || `${config.location.split(',')[0]} (${config.activityType.split(' ')[0]})`,
-        location: config.location,
-        activityType: config.activityType,
-        plannedHours: `${config.startTime} – ${config.endTime}`,
-        thresholdTemp: config.thresholdTemp,
-        currentTemp: 38,
-        currentHeatIndex: 42,
-        currentHumidity: 52,
-        currentUvIndex: 10,
-        currentWindSpeed: 12,
-        overallVerdict: `Caution: Safe early morning until 10:30 AM. Mandatory pause 11 AM–3 PM due to high heat index (${config.thresholdTemp}°C limit).`,
-        decisionStatus: 'CAUTION',
-        goNoGoReason: `Heat index exceeds ${config.thresholdTemp}°C limit between 11 AM and 3 PM under ${config.activityType} exertion.`,
-        aiReasoning: [
-          `Peak temperature reaches 41°C with ${config.activityType} exertion adding direct thermal strain.`,
-          `Relative humidity of 52% severely delays physiological sweat evaporation.`,
-          `UV Index 10 during solar noon increases solar heat absorption on exposed skin.`
-        ],
-        hourlyRisks: Array.from({ length: 13 }).map((_, i) => {
-          const hourNum = 6 + i;
-          const hourStr = `${hourNum < 10 ? '0' : ''}${hourNum}:00`;
-          const hourLabel = hourNum < 12 ? `${hourNum} AM` : hourNum === 12 ? '12 PM' : `${hourNum - 12} PM`;
-          const tempC = 30 + Math.floor(Math.sin((i / 12) * Math.PI) * 12);
-          const heatIndexC = tempC + 4;
-          const isExtreme = heatIndexC >= config.thresholdTemp + 5;
-          const isHigh = heatIndexC >= config.thresholdTemp + 1;
-          const isCaution = heatIndexC >= config.thresholdTemp - 2;
-
-          return {
-            hour: hourStr,
-            hourLabel,
-            tempC,
-            heatIndexC,
-            humidity: 50,
-            uvIndex: Math.min(11, Math.floor(Math.sin((i / 12) * Math.PI) * 12)),
-            riskLevel: isExtreme ? 'extreme' : isHigh ? 'high' : isCaution ? 'caution' : 'safe',
-            recommendation: isHigh
-              ? 'Mandatory shade pause. 15-min hydration break every 30 mins.'
-              : 'Standard hydration breaks permitted.',
-            confidence: i >= 9 ? 'moderate' : 'high',
-          };
-        }),
-        peakHeatWindow: '12:00 PM – 3:00 PM',
-        recommendedPauseWindow: '11:00 AM – 3:00 PM',
-        hydratedBreaksFrequency: 'Every 30 mins',
-        timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      };
-
-      setSavedAnalyses((prev) => [fallbackResult, ...prev]);
-      setActiveAnalysisId(fallbackResult.id);
-      persistAssessmentToSupabase(fallbackResult, authUser);
-      setCurrentView('dashboard');
+      // A failed analysis is reported as a failure, never invented. This used to
+      // synthesise a full verdict from hardcoded numbers (38°C, 52% humidity, a
+      // fixed 11 AM-3 PM pause) and render it as a normal result - so an outage
+      // looked identical to a real assessment, and a supervisor could stand a
+      // crew down, or send them out, on figures nobody measured.
+      showToast(
+        navigator.onLine
+          ? "Heat analysis failed - the server didn't return an assessment. No verdict is shown; please retry."
+          : "You're offline - heat analysis needs a live connection. No verdict is shown; please retry once reconnected."
+      );
+      setCurrentView('setup');
     } finally {
       setIsLoading(false);
     }

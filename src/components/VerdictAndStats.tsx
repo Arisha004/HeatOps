@@ -381,6 +381,23 @@ export const VerdictAndStats: React.FC<VerdictAndStatsProps> = ({
           </div>
         </div>
 
+        {/* AI degradation notice. The deterministic ISO 7243 verdict is still a
+            valid answer, so this is a caveat rather than an error state - but it
+            has to be visible, because an AI-authored verdict and an engine-only
+            one look the same on screen otherwise. */}
+        {analysis.aiEnhanced === false && analysis.aiNote && (
+          <div
+            id="banner-ai-degraded"
+            className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-start gap-2.5"
+          >
+            <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold block mb-0.5">Degraded: deterministic engine only</span>
+              <span className="text-[11px] sm:text-xs text-amber-800 font-normal">{analysis.aiNote}</span>
+            </div>
+          </div>
+        )}
+
         {/* FortyGuard Decision Banner / Pitch Callout */}
         <div className="p-3.5 rounded-xl bg-orange-50/80 border border-orange-200 text-orange-950 text-xs sm:text-sm font-medium leading-snug">
           <span className="font-bold text-orange-900 block mb-0.5">

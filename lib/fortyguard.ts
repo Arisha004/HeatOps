@@ -70,11 +70,26 @@ export interface FGDateTime {
 
 export class FortyGuardError extends Error {}
 
+// Every call below runs inside a single serverless request that the platform
+// kills at maxDuration, so the whole integration has to be bounded in wall
+// clock. Two separate budgets do that:
+//   - HTTP_TIMEOUT_MS caps any one socket that hangs without responding.
+//     Measured latencies: /v1/heatmap submit ~3s, /v1/status ~1.2s. 8s leaves
+//     real headroom over that without letting a dead socket stall the request.
+//   - POLL_BUDGET_MS caps how long we wait for a submitted task to finish.
+// Worst case per FortyGuard call is therefore ~28s. The heatmap and env_params
+// calls run concurrently, so that is the cost of the whole stage, and it leaves
+// room for the Gemini call inside the 60s function limit set in vercel.json.
+// Raising either value means re-checking that sum against maxDuration.
+const HTTP_TIMEOUT_MS = 8000;
+export const POLL_BUDGET_MS = 20000;
+
 async function submitTask(path: string, apiKey: string, payload: any): Promise<string> {
   const res = await fetch(`${FORTYGUARD_BASE}${path}`, {
     method: 'POST',
     headers: { 'api-key': apiKey, 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
   });
   const body = await res.json().catch(() => null);
   if (!res.ok) {
@@ -93,6 +108,7 @@ async function submitTask(path: string, apiKey: string, payload: any): Promise<s
 export async function checkStatus(apiKey: string, activityId: string): Promise<any> {
   const res = await fetch(`${FORTYGUARD_BASE}/v1/status/${activityId}`, {
     headers: { 'api-key': apiKey },
+    signal: AbortSignal.timeout(HTTP_TIMEOUT_MS),
   });
   const body = await res.json().catch(() => null);
   if (!res.ok) {
@@ -101,19 +117,32 @@ export async function checkStatus(apiKey: string, activityId: string): Promise<a
   return body?.data ?? body;
 }
 
+// Bounded by wall clock rather than an attempt count. A fixed 15 attempts at a
+// 2s interval could block for 30s before giving up - most of a serverless
+// request's entire budget spent waiting on an enrichment call that is allowed
+// to fail. The deadline is what actually needs to hold, so poll against it.
 async function pollTask(
   apiKey: string,
   activityId: string,
-  { maxAttempts = 15, intervalMs = 2000 }: { maxAttempts?: number; intervalMs?: number } = {}
+  { budgetMs = POLL_BUDGET_MS, intervalMs = 1000 }: { budgetMs?: number; intervalMs?: number } = {}
 ): Promise<any> {
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+  const deadline = Date.now() + budgetMs;
+  // Never sleep past the deadline - a full interval at the end would push the
+  // whole call over budget just to discover it had already run out.
+  const waitForNextAttempt = async () => {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) return;
+    await new Promise((r) => setTimeout(r, Math.min(intervalMs, remaining)));
+  };
+
+  for (let attempt = 0; Date.now() < deadline; attempt++) {
     let data: any = null;
     try {
       data = await checkStatus(apiKey, activityId);
     } catch (err) {
       // Activity can be briefly unavailable immediately after submission.
       if (attempt < 3) {
-        await new Promise((r) => setTimeout(r, intervalMs));
+        await waitForNextAttempt();
         continue;
       }
       throw err;
@@ -123,9 +152,9 @@ async function pollTask(
     if (status === 'failed' || status === 'error') {
       throw new FortyGuardError(`task ${activityId} failed: ${JSON.stringify(data)}`);
     }
-    await new Promise((r) => setTimeout(r, intervalMs));
+    await waitForNextAttempt();
   }
-  throw new FortyGuardError(`task ${activityId} did not complete within ${maxAttempts} polls`);
+  throw new FortyGuardError(`task ${activityId} did not complete within ${budgetMs}ms`);
 }
 
 // ---------------------------------------------------------------------------

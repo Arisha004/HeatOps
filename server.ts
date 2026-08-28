@@ -145,6 +145,40 @@ if (process.env.GEMINI_API_KEY) {
   });
 }
 
+// The Gemini call is the last stage of an already slow request and runs inside
+// a serverless invocation with a hard ceiling. Cap it so a slow model response
+// degrades to the deterministic verdict instead of taking the whole request
+// down with it.
+const GEMINI_TIMEOUT_MS = 12000;
+
+// Turns a Gemini failure into something a supervisor reading the dashboard can
+// act on. The distinction that matters most in practice is a project-level
+// block (403): no tokens are consumed, so the provider dashboard shows zero
+// usage and the outage looks like the app never called the API at all.
+function describeAiFailure(err: unknown): string {
+  const status = (err as any)?.status;
+  const message = err instanceof Error ? err.message : String(err);
+
+  if (status === 403 || /PERMISSION_DENIED/i.test(message)) {
+    return (
+      'AI narrative unavailable: Gemini rejected the request (403 PERMISSION_DENIED). ' +
+      "The API key's Google Cloud project is blocked - usually an unpaid or failed billing payment. " +
+      'No tokens are being consumed, so provider usage will read zero. Verdict below is from the deterministic ISO 7243 engine.'
+    );
+  }
+  if (status === 429 || /RESOURCE_EXHAUSTED|quota/i.test(message)) {
+    return 'AI narrative unavailable: Gemini quota exhausted (429). Verdict below is from the deterministic ISO 7243 engine.';
+  }
+  if (status === 401 || /API_KEY_INVALID|API key not valid/i.test(message)) {
+    return 'AI narrative unavailable: the configured Gemini API key was rejected. Verdict below is from the deterministic ISO 7243 engine.';
+  }
+  // AbortSignal.timeout() surfaces as "aborted due to timeout", not "timed out".
+  if (/timed out|timeout|abort/i.test(message) || (err as any)?.name === 'TimeoutError') {
+    return 'AI narrative unavailable: Gemini did not respond in time. Verdict below is from the deterministic ISO 7243 engine.';
+  }
+  return 'AI narrative unavailable: the Gemini call failed. Verdict below is from the deterministic ISO 7243 engine.';
+}
+
 // Known coordinate fallbacks for major industrial hubs in case of upstream geocoding timeouts
 const KNOWN_COORDINATES: Record<string, { lat: number; lon: number; name: string }> = {
   phoenix: { lat: 33.4484, lon: -112.0740, name: 'Phoenix, Arizona' },
@@ -724,8 +758,19 @@ app.post('/api/analyze-heat', async (req, res) => {
 
   let finalResult = baseResult;
 
+  // Whether the verdict the client renders is AI-authored or came straight from
+  // the deterministic engine. This ships in the response because the two are
+  // otherwise indistinguishable on screen - and a supervisor reading a heat
+  // safety call is entitled to know which one produced it.
+  let aiEnhanced = false;
+  let aiNote: string | undefined;
+
   // 4. Enhance with Gemini 2.5/3.7 Flash if AI is configured
-  if (ai) {
+  if (!ai) {
+    aiNote =
+      'AI narrative unavailable: no GEMINI_API_KEY is configured on this server. ' +
+      'Verdict below is from the deterministic ISO 7243 engine.';
+  } else {
     try {
       const prompt = `You are HeatOps, an ISO 7243:2017 occupational heat safety AI engineer for industrial, infrastructure, and agricultural work sites in the United States.
 
@@ -751,6 +796,9 @@ EVALUATE AND RETURN JSON STRICTLY WITH:
         model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
+          // Actually cancels the in-flight request rather than just abandoning
+          // it, so a slow model doesn't hold the serverless invocation open.
+          abortSignal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
           responseMimeType: 'application/json',
           responseSchema: {
             type: Type.OBJECT,
@@ -770,6 +818,7 @@ EVALUATE AND RETURN JSON STRICTLY WITH:
 
       if (response.text) {
         const parsed = JSON.parse(response.text);
+        aiEnhanced = true;
         finalResult = {
           ...baseResult,
           overallVerdict: parsed.overallVerdict || baseResult.overallVerdict,
@@ -780,16 +829,21 @@ EVALUATE AND RETURN JSON STRICTLY WITH:
           peakHeatWindow: parsed.peakHeatWindow || baseResult.peakHeatWindow,
           hydratedBreaksFrequency: parsed.hydratedBreaksFrequency || baseResult.hydratedBreaksFrequency,
         };
+      } else {
+        aiNote =
+          'AI narrative unavailable: Gemini returned an empty response. ' +
+          'Verdict below is from the deterministic ISO 7243 engine.';
       }
     } catch (err) {
-      console.warn('Gemini AI inference notice, returning calibrated physics telemetry:', err);
+      aiNote = describeAiFailure(err);
+      console.warn('Gemini AI inference failed, returning deterministic physics telemetry:', err);
     }
   }
 
   // Store in cache
   // Expose the resolved coordinates so the client can request a FortyGuard
   // Heat Intelligence PDF for this exact site without re-geocoding.
-  const responsePayload = { ...finalResult, latitude: lat, longitude: lon };
+  const responsePayload = { ...finalResult, latitude: lat, longitude: lon, aiEnhanced, aiNote };
 
   heatAnalysisCache.set(cacheKey, { data: responsePayload, timestamp: Date.now() });
 
