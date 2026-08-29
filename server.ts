@@ -527,23 +527,36 @@ function buildOccupationalHeatProfile(
     const windCooling = Math.min(1.5, (wind / 3.6) * 0.3);
     calculatedWbgt -= windCooling;
 
-    // Add activity metabolic exertion load
-    calculatedWbgt += activityStrainC;
-
+    // NOTE: metabolic/activity load is intentionally NOT added to calculatedWbgt.
+    // WBGT is an ENVIRONMENTAL measurement (air temp + humidity + solar + wind
+    // only). ISO 7243 accounts for workload by comparing that environmental
+    // WBGT against a reference limit that varies by metabolic rate — which is
+    // exactly what `effectiveThreshold` (threshold + thresholdOffset) already
+    // does below. Adding activityStrainC directly onto the WBGT number here
+    // used to double-count the same metabolic factor twice (once into the
+    // WBGT itself, once again into the threshold), which is why WBGT was
+    // coming out nearly equal to dry-bulb temp even at low humidity — it had
+    // stopped being a physical WBGT and become WBGT+solar+metabolic combined.
     const heatIndexC = Math.round(calculatedWbgt * 10) / 10;
 
     let riskLevel: 'safe' | 'caution' | 'high' | 'extreme' = 'safe';
     let recommendation = 'Work permitted with standard hydration breaks.';
     let confidence: 'high' | 'moderate' | 'low' = 'high';
 
-    // ISO 7243 & ACGIH TLV Base WBGT Thresholds
-    if (heatIndexC >= 30.5 || heatIndexC >= effectiveThreshold + 4) {
+    // ISO 7243 & ACGIH TLV Thresholds — evaluated ONLY relative to
+    // effectiveThreshold (which already encodes activity/acclimatization/water
+    // via thresholdOffset). The previous version OR'd this against a hardcoded
+    // 30.5 / 28.0 / 25.0 floor, so once WBGT cleared that fixed number the hour
+    // was always "extreme" no matter what threshold the user configured — that
+    // hardcoded floor is what made every single hour in the report/CSV show
+    // EXTREME regardless of the actual configured limit. Removed.
+    if (heatIndexC >= effectiveThreshold + 4) {
       riskLevel = 'extreme';
       recommendation = `CRITICAL HEAT: Stop heavy outdoor work. 15m work/45m rest or suspend shift during ${activityType}.`;
-    } else if (heatIndexC >= 28.0 || heatIndexC >= effectiveThreshold) {
+    } else if (heatIndexC >= effectiveThreshold) {
       riskLevel = 'high';
       recommendation = `MANDATORY SHADE PAUSE: 30-min work / 30-min rest cycle. Electrolytes mandatory.`;
-    } else if (heatIndexC >= 25.0 || heatIndexC >= effectiveThreshold - 3) {
+    } else if (heatIndexC >= effectiveThreshold - 3) {
       riskLevel = 'caution';
       recommendation = `INCREASED VIGILANCE: 45-min work / 15-min rest cycle. Provide shaded rest shelter.`;
     }
@@ -953,25 +966,47 @@ app.post('/api/analyze-heat', async (req, res) => {
       'Verdict below is from the deterministic ISO 7243 engine.';
   } else {
     try {
+      // IMPORTANT: the deterministic engine (buildOccupationalHeatProfile) is
+      // the single source of truth for decisionStatus, recommendedPauseWindow,
+      // peakHeatWindow, and the hourlyRisks table that the UI/CSV/PDF render
+      // hour-by-hour. Gemini used to be asked to invent its own versions of
+      // those same fields from only 3 summary numbers, and its output then
+      // overwrote the deterministic ones — while hourlyRisks stayed
+      // untouched. That let the AI narrative disagree with the hourly table
+      // (e.g. narrative saying "safe until 10:30 AM" while every hour in the
+      // table was flagged EXTREME). Gemini is now given the ACTUAL computed
+      // verdict/windows as ground truth and is only allowed to improve the
+      // wording of the narrative fields (overallVerdict phrasing,
+      // goNoGoReason, aiReasoning, hydratedBreaksFrequency) — it can no
+      // longer change decisionStatus, recommendedPauseWindow, or
+      // peakHeatWindow, so every surface stays consistent with one another.
+      const hourlyTableSummary = baseResult.hourlyRisks
+        .map((h: any) => `${h.hourLabel}: ${h.tempC}°C air, WBGT ${h.heatIndexC}°C, ${h.riskLevel.toUpperCase()}`)
+        .join('; ');
+
       const prompt = `You are HeatOps, an ISO 7243:2017 occupational heat safety AI engineer for industrial, infrastructure, and agricultural work sites in the United States.
 
-SITE METEOROLOGICAL TELEMETRY:
+The deterministic ISO 7243 risk engine has ALREADY computed the safety decision below from real hourly telemetry. Your only job is to write clear, professional narrative text that accurately reflects these exact computed facts. Do NOT invent a different decision, different pause window, or different peak window — your text must match the numbers given, not contradict them.
+
+COMPUTED GROUND TRUTH (do not contradict):
+- Decision Status: ${baseResult.decisionStatus}
+- Recommended Pause Window: ${baseResult.recommendedPauseWindow}
+- Peak Heat Window: ${baseResult.peakHeatWindow}
+- Safest Shift Window: ${baseResult.safestWindow}
+- Exceedance Hours (HIGH/EXTREME): ${baseResult.exceedanceHours}
+- Configured Safety Limit: ${thresh}°C WBGT
+- Hour-by-hour risk (already final, do not change): ${hourlyTableSummary}
+
+SITE CONTEXT:
 - Location: ${displayName || location} (Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)})
 - Activity Type: ${activityType}
 - Working Hours: ${start} to ${end}
-- Configured Safety Limit: ${thresh}°C Heat Index
-- Peak Forecast Temp: ${Math.max(...baseResult.hourlyRisks.map((h: any) => h.tempC))}°C
-- Peak Forecast Heat Index: ${Math.max(...baseResult.hourlyRisks.map((h: any) => h.heatIndexC))}°C
-- Max UV Index: ${Math.max(...baseResult.hourlyRisks.map((h: any) => h.uvIndex))}
 
-EVALUATE AND RETURN JSON STRICTLY WITH:
-1. overallVerdict: concise, authoritative 1-sentence decision with explicit work & pause windows (e.g., "Safe early morning until 10:30 AM. Mandatory shade pause 11:00 AM–03:30 PM due to extreme thermal strain.").
-2. decisionStatus: "GO" | "ADJUST" | "NO-GO" | "CAUTION"
-3. goNoGoReason: 1 sentence explaining the critical physiological limit (WBGT, dehydration, metabolic load).
-4. aiReasoning: array of exactly 3 concise, factual bullet points detailing solar flux/cement/asphalt thermal addition, humidity sweat evaporation rates, and ISO 7243 compliance.
-5. recommendedPauseWindow: string (e.g. "11:00 AM – 03:30 PM" or "No shutdown required")
-6. peakHeatWindow: string (e.g. "12:00 PM – 03:00 PM")
-7. hydratedBreaksFrequency: string (e.g. "Every 20 mins in shaded shelter")`;
+RETURN JSON STRICTLY WITH:
+1. overallVerdict: 1 authoritative sentence stating the decision and pause window EXACTLY as given above (you may rephrase wording, not the times or status).
+2. goNoGoReason: 1 sentence explaining the physiological limit (WBGT, dehydration, metabolic load) consistent with the computed numbers.
+3. aiReasoning: array of exactly 3 concise, factual bullet points on solar flux/cement thermal addition, humidity sweat evaporation, and ISO 7243 compliance — consistent with the hour-by-hour data given.
+4. hydratedBreaksFrequency: string (e.g. "Every 20 mins in shaded shelter")`;
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.6-flash',
@@ -985,14 +1020,11 @@ EVALUATE AND RETURN JSON STRICTLY WITH:
             type: Type.OBJECT,
             properties: {
               overallVerdict: { type: Type.STRING },
-              decisionStatus: { type: Type.STRING, enum: ['GO', 'ADJUST', 'NO-GO', 'CAUTION'] },
               goNoGoReason: { type: Type.STRING },
               aiReasoning: { type: Type.ARRAY, items: { type: Type.STRING } },
-              recommendedPauseWindow: { type: Type.STRING },
-              peakHeatWindow: { type: Type.STRING },
               hydratedBreaksFrequency: { type: Type.STRING },
             },
-            required: ['overallVerdict', 'decisionStatus', 'goNoGoReason', 'aiReasoning', 'recommendedPauseWindow'],
+            required: ['overallVerdict', 'goNoGoReason', 'aiReasoning'],
           },
         },
       });
@@ -1000,14 +1032,14 @@ EVALUATE AND RETURN JSON STRICTLY WITH:
       if (response.text) {
         const parsed = JSON.parse(response.text);
         aiEnhanced = true;
+        // decisionStatus, recommendedPauseWindow, and peakHeatWindow are
+        // deliberately NOT taken from the AI response — they stay pinned to
+        // baseResult so the narrative can never drift from the hourly table.
         finalResult = {
           ...baseResult,
           overallVerdict: parsed.overallVerdict || baseResult.overallVerdict,
-          decisionStatus: parsed.decisionStatus || baseResult.decisionStatus,
           goNoGoReason: parsed.goNoGoReason || baseResult.goNoGoReason,
           aiReasoning: parsed.aiReasoning && parsed.aiReasoning.length === 3 ? parsed.aiReasoning : baseResult.aiReasoning,
-          recommendedPauseWindow: parsed.recommendedPauseWindow || baseResult.recommendedPauseWindow,
-          peakHeatWindow: parsed.peakHeatWindow || baseResult.peakHeatWindow,
           hydratedBreaksFrequency: parsed.hydratedBreaksFrequency || baseResult.hydratedBreaksFrequency,
         };
       } else {

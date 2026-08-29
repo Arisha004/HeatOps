@@ -11,6 +11,18 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = () => {
   const [currentTemp, setCurrentTemp] = useState<number>(43.5);
   const [currentWbgt, setCurrentWbgt] = useState<number>(34.8);
   const [isRotating, setIsRotating] = useState<boolean>(true);
+  // Read inside the render loop via ref instead of putting isRotating in the
+  // effect's dependency array. Previously toggling rotation re-ran the whole
+  // setup effect, which tore down and rebuilt the entire WebGLRenderer/scene/
+  // every geometry on every click. The cleanup only called renderer.dispose()
+  // and never geometry.dispose()/material.dispose(), so repeated toggles (and
+  // React's dev-mode double-invoke of effects) leaked GPU buffers across
+  // rebuilds — which is what surfaced as the "drawArrays: no buffer bound"
+  // WebGL console errors.
+  const isRotatingRef = useRef(isRotating);
+  useEffect(() => {
+    isRotatingRef.current = isRotating;
+  }, [isRotating]);
 
   const sceneRef = useRef<THREE.Scene | null>(null);
   const globeMeshRef = useRef<THREE.Mesh | null>(null);
@@ -248,7 +260,7 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = () => {
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = (performance.now() - startTime) / 1000;
 
-      if (globeMeshRef.current && isRotating && !isDragging) {
+      if (globeMeshRef.current && isRotatingRef.current && !isDragging) {
         globeMeshRef.current.rotation.y += 0.004;
       }
 
@@ -288,9 +300,27 @@ export const ThermalGlobe3D: React.FC<ThermalGlobe3DProps> = () => {
       container.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
+      // Dispose every GPU resource this effect created, not just the
+      // renderer. Geometries/materials are separate GPU allocations from the
+      // renderer itself — skipping them here was the actual leak.
+      globeGeom.dispose();
+      globeMat.dispose();
+      wireGeom.dispose();
+      wireMat.dispose();
+      bandGeom.dispose();
+      bandMat.dispose();
+      atmosGeom.dispose();
+      atmosMat.dispose();
+      particleGeom.dispose();
+      particleMat.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
     };
-  }, [isRotating]);
+    // Runs once on mount only. isRotating is read via isRotatingRef inside the
+    // loop above so toggling it no longer tears down and rebuilds the entire
+    // WebGL scene.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const activeConfig = timePresets[selectedTime];
 
