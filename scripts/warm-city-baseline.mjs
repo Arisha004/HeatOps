@@ -1,7 +1,7 @@
 // Warms the city-baseline cache of a RUNNING HeatOps server so the first
 // analysis a judge sees already has a live FortyGuard UHI delta.
 //
-// Why this is needed: the 15 km city polygon takes ~90s to compute on
+// Why this is needed: the 15 km city polygon takes 90-240s to compute on
 // FortyGuard's side, which is longer than the whole serverless request budget
 // (vercel.json maxDuration: 60). So /api/analyze-heat submits the city job on
 // one request and resolves it on a later one. Left alone, that means the FIRST
@@ -29,7 +29,9 @@ const arg = (flag, fallback) => {
 
 const BASE = arg('--url', 'http://localhost:3000').replace(/\/$/, '');
 const LOCATION = arg('--location', 'Sky Harbor Logistics Corridor, Phoenix, Arizona');
-const WAIT_MS = Number(arg('--wait', '100')) * 1000;
+// 90-240s measured at Phoenix, load-dependent. Default generously; the script
+// reports honestly if the job still hasn't landed.
+const WAIT_MS = Number(arg('--wait', '260')) * 1000;
 
 const body = {
   location: LOCATION,

@@ -52,12 +52,14 @@ interface FortyGuardTelemetry {
   };
 }
 
-// The 15 km city polygon takes ~90s to compute and the 5 km one ~50s (measured
-// against the live API at Phoenix, granularity 100). Both exceed what a single
-// 60s serverless invocation can wait for on top of geocoding, Open-Meteo and
-// Gemini. So the city baseline is computed ACROSS requests: the first analysis
-// submits the job and caches the activity_id, later requests resolve it. Warm
-// this before a demo with `node scripts/warm-city-baseline.mjs`.
+// The 15 km city polygon takes 90-240s to compute (measured against the live
+// API at Phoenix, granularity 100: 90s at 12:00, 237s at 05:00 - the latency
+// is load-dependent and NOT stable), and the 5 km one ~50s. All of those
+// exceed what a single 60s serverless invocation can wait for on top of
+// geocoding, Open-Meteo and Gemini. So the city baseline is computed ACROSS
+// requests: the first analysis submits the job and caches the activity_id,
+// later requests resolve it. Warm this before a demo with
+// `node scripts/warm-city-baseline.mjs`.
 //
 // This is in-memory, so on Vercel it is per-instance and does not survive a
 // cold start. That is acceptable for a demo but means the first request to a
