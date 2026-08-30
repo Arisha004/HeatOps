@@ -11,7 +11,11 @@
 ---
 
 ## Overview
+<p align="center">
+  <img src="mockup3d.png" alt="HeatOps 3D thermal visualizer" width="800">
+</p>
 
+---
 **HeatOps** is an enterprise-grade occupational heat safety intelligence platform designed for construction supervisors, HSE directors, infrastructure contractors, and agricultural operations. 
 
 It fuses **hyperlocal thermal microclimate data** (via FortyGuard API and real-world meteorological forecasts), **deterministic ISO 7243 / ACGIH WBGT risk calculation models**, and **Google Gemini AI agents** to deliver:
